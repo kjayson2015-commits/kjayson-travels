@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Editor · KJayson Travels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;600&display=swap">
+<style>
+:root{--bg:#F1ECE2;--ink:#1E2621;--muted:#4A544D;--accent:#A8441F;--paper:#FFFFFF;--line:rgba(30,38,33,.22);--photo:#D8D1C2;--bad:#B42318;--good:#1F6F43;--serif:'Fraunces',Georgia,serif;--sans:'Work Sans',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55}
+a{color:var(--accent)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header{border-bottom:1.5px solid var(--ink);position:sticky;top:0;background:rgba(241,236,226,.94);backdrop-filter:blur(8px);z-index:5}
+header .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;padding-bottom:10px}
+.brand{font-family:var(--serif);font-style:italic;font-size:22px}
+.badge{font-family:var(--sans);font-style:normal;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--ink);border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 16px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.btn.solid{background:var(--ink);color:var(--bg)}.btn.solid:hover{background:var(--accent);border-color:var(--accent)}
+.btn.small{min-height:36px;padding:6px 12px;font-size:14px}
+.btn.link{border-color:transparent;padding-left:8px;padding-right:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px}
+h1,h2,h3{font-family:var(--serif)}
+h1{font-size:34px;margin:0 0 4px}
+h2{font-size:22px;margin:0 0 10px}
+label{display:block;font-weight:600;font-size:14px;margin:0 0 6px}
+.hint{font-size:13px;color:var(--muted);margin:4px 0 0}
+input[type=text],input[type=password],input[type=date],textarea{width:100%;font:inherit;font-size:16px;padding:11px 13px;border:1.5px solid rgba(30,38,33,.35);border-radius:10px;background:#FFFDF8;color:var(--ink)}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+textarea{resize:vertical;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.layout{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;padding:24px 0 80px}
+.col-form{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.col-prev{flex:1 1 420px;min-width:0;position:sticky;top:76px;display:flex;flex-direction:column;gap:18px}
+.count{font-size:13px;color:var(--muted)}.count.over{color:var(--bad);font-weight:600}
+.postcard{border:1px solid var(--line);border-radius:12px;padding:14px;background:#FFFDF8;display:flex;flex-direction:column;gap:10px}
+.postcard-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.thumb{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.thumb img{width:140px;height:96px;object-fit:cover;border-radius:6px;background:var(--photo)}
+.thumb .alt{flex:1 1 200px;min-width:0}
+.list{display:flex;flex-direction:column}
+.list button{display:flex;justify-content:space-between;gap:10px;text-align:left;width:100%;background:none;border:0;border-top:1px solid var(--line);padding:12px 4px;font:inherit;color:var(--ink);cursor:pointer;min-height:44px}
+.list button:hover{color:var(--accent)}
+.pill{align-self:center;font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.draft{border-color:var(--accent);color:var(--accent)}
+.status{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:#FFFDF8}
+.status.ok{border-color:var(--good);color:var(--good)}.status.err{border-color:var(--bad);color:var(--bad)}
+.serp{font-family:Arial,sans-serif;background:#fff;border-radius:10px;padding:14px;border:1px solid #e3e3e3}
+.serp .site{font-size:14px;color:#202124}.serp .url{font-size:12px;color:#4d5156}
+.serp .t{color:#1a0dab;font-size:20px;line-height:1.3;margin:4px 0 3px}
+.serp .d{color:#4d5156;font-size:14px;line-height:1.5}
+.prev-thread{list-style:none;margin:0;padding:0}
+.prev-post{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:12px}
+.prev-post .rail{display:flex;flex-direction:column;align-items:center}
+.prev-post .rail img{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--ink);background:var(--photo)}
+.prev-post .rail span{width:2px;flex-grow:1;background:var(--line);margin:5px 0 4px}
+.prev-post:last-child .rail span{display:none}
+.prev-post .b{padding-bottom:18px;min-width:0}
+.prev-post .who{font-size:14px;color:var(--muted)}.prev-post .who strong{color:var(--ink)}
+.prev-post p{margin:3px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:16.5px}
+.prev-post .empty{color:var(--muted);font-style:italic}
+.prev-post figure{margin:10px 0 0;background:#fff;padding:8px 8px 22px;box-shadow:0 4px 14px rgba(30,38,33,.12)}
+.prev-post figure img{width:100%;display:block}
+.check{display:flex;gap:10px;align-items:center;font-weight:600;min-height:44px}
+.check input{width:20px;height:20px}
+ol.steps{margin:8px 0 0;padding-left:20px}ol.steps li{margin:4px 0}
+.hide{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">KJayson Travels <span class="badge">Editor · only you</span></div>
+  <div class="row">
+    <a class="btn link" id="viewSite" href="../">View site</a>
+    <button class="btn hide" id="disconnectBtn" type="button">Disconnect</button>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <!-- Connect -->
+  <section id="connect" class="panel hide" style="max-width:720px;margin:32px auto">
+    <h1>Connect your GitHub</h1>
+    <p>Your threads are saved straight into your site's GitHub repo, and the site rebuilds itself about a minute later. You only do this once per device.</p>
+    <ol class="steps">
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → New fine-grained token</a>.</li>
+      <li>Name it <em>KJayson Travels editor</em>. Under <strong>Repository access</strong> choose <em>Only select repositories</em> → <strong id="repoName">kjayson-travels</strong>.</li>
+      <li>Under <strong>Permissions → Repository → Contents</strong> choose <em>Read and write</em>. Generate the token and copy it.</li>
+    </ol>
+    <div style="margin-top:16px">
+      <label for="tokenInput">Paste your token</label>
+      <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      <p class="hint">It stays in this browser only. Never share it or post it anywhere.</p>
+    </div>
+    <div class="row" style="margin-top:14px"><button class="btn solid" id="connectBtn" type="button">Connect</button><span id="connectMsg" role="status"></span></div>
+  </section>
+
+  <!-- Editor -->
+  <div id="app" class="layout hide">
+    <div class="col-form">
+      <div class="row" style="justify-content:space-between">
+        <div><h1 id="formTitle">New thread</h1><p class="hint" id="whoami"></p></div>
+        <div class="row"><button class="btn" id="newBtn" type="button">+ New thread</button></div>
+      </div>
+
+      <section class="panel">
+        <h2>Thread details</h2>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div><label for="f-title">Title <span class="count" id="c-title"></span></label><input id="f-title" type="text" placeholder="Sunrise on Lake Victoria, and every spot after it"><p class="hint">Put the place in the title, the way people search: "Things to do in Diani on a budget".</p></div>
+          <div class="grid">
+            <div><label for="f-place">Place (town or spot)</label><input id="f-place" type="text" placeholder="Kisumu"></div>
+            <div><label for="f-region">Area (optional)</label><input id="f-region" type="text" placeholder="Lake Victoria"></div>
+            <div><label for="f-country">Country</label><input id="f-country" type="text" placeholder="Kenya"></div>
+            <div><label for="f-date">Date</label><input id="f-date" type="date"></div>
+          </div>
+          <div><label for="f-summary">Google description <span class="count" id="c-summary"></span></label><textarea id="f-summary" rows="3" placeholder="One or two sentences on what the reader gets: places, prices, tips."></textarea><p class="hint">Aim for 120–160 characters. This is the grey text under your link on Google.</p></div>
+          <div class="grid">
+            <div><label for="f-tags">Topics (comma separated)</label><input id="f-tags" type="text" placeholder="beach, budget, food"></div>
+            <div><label for="f-slug">Link name</label><input id="f-slug" type="text" placeholder="sunrise-on-lake-victoria" spellcheck="false"><p class="hint" id="slugHint"></p></div>
+          </div>
+          <label class="check"><input id="f-draft" type="checkbox"> Hide from site (draft)</label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Posts</h2>
+        <p class="hint" style="margin-top:-6px;margin-bottom:12px">Write it like an X thread: one moment per post. Photos need a short description so Google can find them.</p>
+        <div id="posts" style="display:flex;flex-direction:column;gap:14px"></div>
+        <button class="btn" id="addPost" type="button" style="margin-top:14px;width:100%">+ Add another post</button>
+      </section>
+
+      <section class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div class="row"><button class="btn solid" id="publishBtn" type="button">Publish thread</button><button class="btn link" id="clearBtn" type="button">Clear form</button></div>
+          <span class="hint" id="autosave"></span>
+        </div>
+        <div id="pubStatus" class="status hide" role="status" style="margin-top:14px"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Your threads</h2>
+        <div id="threadList" class="list"><p class="hint">Loading…</p></div>
+      </section>
+    </div>
+
+    <aside class="col-prev" aria-label="Preview">
+      <div>
+        <h2>On Google</h2>
+        <div class="serp" aria-hidden="true">
+          <div class="site">KJayson Travels</div>
+          <div class="url" id="serpUrl"></div>
+          <div class="t" id="serpTitle"></div>
+          <div class="d" id="serpDesc"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 id="prevTitle" style="font-size:24px">Your thread</h2>
+        <p class="hint" id="prevMeta" style="margin-top:-6px;margin-bottom:14px"></p>
+        <ol class="prev-thread" id="preview"></ol>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var CFG = __KJT_CONFIG__;
+  var O = CFG.repo.owner, R = CFG.repo.name, B = CFG.repo.branch || 'main';
+  var TOKEN_KEY = 'kjt-token', DRAFT_KEY = 'kjt-autosave';
+  var token = null;
+  try { token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var slugify = function (s) { return String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80); };
+  var today = function () { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  var avatar = CFG.siteUrl + 'assets/avatar.webp';
+  $('repoName').textContent = R;
+
+  // ---------- state ----------
+  var existing = [];          // [{slug, title, date, draft, sha, path}]
+  var editing = null;         // {slug, sha} when editing an existing thread
+  var slugTouched = false;
+  var thread = blank();
+  function blank() { return { title: '', place: '', region: '', country: 'Kenya', date: today(), summary: '', tags: '', slug: '', draft: false, posts: [{ text: '', image: null }, { text: '', image: null }] }; }
+
+  // ---------- GitHub API ----------
+  function gh(method, p, body) {
+    return fetch('https://api.github.com' + p, {
+      method: method,
+      headers: Object.assign({ Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, body ? { 'Content-Type': 'application/json' } : {}),
+      body: body ? JSON.stringify(body) : undefined,
+      cache: 'no-store'
+    }).then(function (r) {
+      if (r.status === 404 && method === 'GET') return null;
+      if (!r.ok) return r.text().then(function (t) { var m = t; try { m = JSON.parse(t).message; } catch (e) {} throw new Error(r.status + ' · ' + m); });
+      return r.status === 204 ? null : r.json();
+    });
+  }
+  var b64utf8 = function (str) { var bytes = new TextEncoder().encode(str), s = ''; for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); };
+  var fromB64utf8 = function (b) { var bin = atob(String(b).replace(/\s/g, '')), arr = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i); return new TextDecoder().decode(arr); };
+  var blobToB64 = function (blob) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(',')[1]); }; fr.onerror = rej; fr.readAsDataURL(blob); }); };
+
+  function commitFiles(files, message) {
+    var refPath = '/repos/' + O + '/' + R + '/git/ref/heads/' + B;
+    var headSha, baseTree;
+    return gh('GET', refPath).then(function (ref) {
+      if (!ref) throw new Error('Branch "' + B + '" not found in ' + O + '/' + R);
+      headSha = ref.object.sha;
+      return gh('GET', '/repos/' + O + '/' + R + '/git/commits/' + headSha);
+    }).then(function (c) {
+      baseTree = c.tree.sha;
+      var chain = Promise.resolve(), tree = [];
+      files.forEach(function (f) {
+        if (f.remove) { tree.push({ path: f.path, mode: '100644', type: 'blob', sha: null }); return; }
+        chain = chain.then(function () { return gh('POST', '/repos/' + O + '/' + R + '/git/blobs', { content: f.base64, encoding: 'base64' }); })
+          .then(function (blob) { tree.push({ path: f.path, mode: '100644', type: 'blob', sha: blob.sha }); });
+      });
+      return chain.then(function () { return gh('POST', '/repos/' + O + '/' + R + '/git/trees', { base_tree: baseTree, tree: tree }); });
+    }).then(function (t) {
+      return gh('POST', '/repos/' + O + '/' + R + '/git/commits', { message: message, tree: t.sha, parents: [headSha] });
+    }).then(function (c) {
+      return gh('PATCH', '/repos/' + O + '/' + R + '/git/refs/heads/' + B, { sha: c.sha });
+    });
+  }
+
+  // ---------- images ----------
+  function loadBitmap(file) {
+    if (window.createImageBitmap) return createImageBitmap(file, { imageOrientation: 'from-image' }).catch(function () { return createImageBitmap(file); });
+    return new Promise(function (res, rej) { var img = new Image(); img.onload = function () { res(img); }; img.onerror = rej; img.src = URL.createObjectURL(file); });
+  }
+  function drawTo(bmp, maxW, type, quality, crop) {
+    var w = bmp.width, h = bmp.height, c = document.createElement('canvas'), ctx;
+    if (crop) {
+      c.width = crop.w; c.height = crop.h; ctx = c.getContext('2d');
+      var s = Math.max(crop.w / w, crop.h / h), dw = w * s, dh = h * s;
+      ctx.drawImage(bmp, (crop.w - dw) / 2, (crop.h - dh) / 2, dw, dh);
+    } else {
+      var scale = Math.min(1, maxW / w); c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+      ctx = c.getContext('2d'); ctx.drawImage(bmp, 0, 0, c.width, c.height);
+    }
+    return new Promise(function (res) { c.toBlob(function (b) { res({ blob: b, w: c.width, h: c.height }); }, type, quality); });
+  }
+  function processImage(file) {
+    return loadBitmap(file).then(function (bmp) {
+      return Promise.all([drawTo(bmp, 1600, 'image/webp', 0.82), drawTo(bmp, 800, 'image/webp', 0.8), drawTo(bmp, 0, 'image/jpeg', 0.85, { w: 1200, h: 630 })]);
+    }).then(function (r) {
+      return { width: r[0].w, height: r[0].h, b1600: r[0].blob, b800: r[1].blob, og: r[2].blob, preview: URL.createObjectURL(r[1].blob) };
+    });
+  }
+
+  // ---------- render form ----------
+  var fields = ['title', 'place', 'region', 'country', 'date', 'summary', 'tags', 'slug'];
+  function fillForm() {
+    fields.forEach(function (k) { $('f-' + k).value = thread[k] || ''; });
+    $('f-draft').checked = !!thread.draft;
+    $('formTitle').textContent = editing ? 'Edit thread' : 'New thread';
+    renderPosts(); refresh();
+  }
+  function renderPosts() {
+    var box = $('posts'); box.innerHTML = '';
+    thread.posts.forEach(function (p, i) {
+      var n = thread.posts.length;
+      var el = document.createElement('div'); el.className = 'postcard';
+      var imgSrc = p.image ? (p.image._preview || (CFG.siteUrl + p.image.src)) : '';
+      el.innerHTML =
+        '<div class="postcard-head"><label for="post-' + i + '" style="margin:0">Post ' + (i + 1) + ' of ' + n + '</label>' +
+        '<div class="row" style="gap:4px">' +
+        '<button class="btn small link" type="button" data-act="up"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move post ' + (i + 1) + ' up">↑</button>' +
+        '<button class="btn small link" type="button" data-act="down"' + (i === n - 1 ? ' disabled' : '') + ' aria-label="Move post ' + (i + 1) + ' down">↓</button>' +
+        '<button class="btn small link" type="button" data-act="remove"' + (n < 2 ? ' disabled' : '') + '>Remove</button></div></div>' +
+        '<textarea id="post-' + i + '" rows="4" placeholder="' + (i === 0 ? 'Hook them: where are you and why should they keep reading?' : 'What happened next?') + '">' + esc(p.text) + '</textarea>' +
+        '<div class="row" style="justify-content:space-between"><span class="count" data-count></span>' +
+        (p.image ? '' : '<label class="btn small" style="margin:0">Add photo<input type="file" accept="image/*" class="sr" data-act="file"></label>') + '</div>' +
+        (p.image ? '<div class="thumb"><img src="' + esc(imgSrc) + '" alt=""><div class="alt"><label for="alt-' + i + '">Describe the photo (for Google &amp; screen readers)</label><input id="alt-' + i + '" type="text" value="' + esc(p.image.alt || '') + '" placeholder="Fishing boats coming in at sunset, Dunga Beach, Kisumu" data-act="alt"><button class="btn small link" type="button" data-act="rmimg" style="margin-top:6px">Remove photo</button></div></div>' : '');
+      var ta = el.querySelector('textarea'), cnt = el.querySelector('[data-count]');
+      var setCount = function () { var L = ta.value.length; cnt.textContent = L + ' / 280'; cnt.className = 'count' + (L > 280 ? ' over' : ''); };
+      setCount();
+      ta.addEventListener('input', function () { p.text = ta.value; setCount(); refresh(); });
+      el.addEventListener('click', function (e) {
+        var a = e.target.closest('[data-act]'); if (!a || a.disabled) return;
+        var act = a.getAttribute('data-act');
+        if (act === 'up' && i > 0) { thread.posts.splice(i - 1, 0, thread.posts.splice(i, 1)[0]); renderPosts(); refresh(); }
+        if (act === 'down' && i < n - 1) { thread.posts.splice(i + 1, 0, thread.posts.splice(i, 1)[0]); renderPosts(); refresh(); }
+        if (act === 'remove' && n > 1) { thread.posts.splice(i, 1); renderPosts(); refresh(); }
+        if (act === 'rmimg') { p.image = null; renderPosts(); refresh(); }
+      });
+      var fi = el.querySelector('[data-act=file]');
+      if (fi) fi.addEventListener('change', function () {
+        var f = fi.files && fi.files[0]; if (!f) return;
+        cnt.textContent = 'Preparing photo…';
+        processImage(f).then(function (img) {
+          p.image = { width: img.width, height: img.height, alt: '', _pending: img, _preview: img.preview };
+          renderPosts(); refresh();
+          var altEl = $('alt-' + i); if (altEl) altEl.focus();
+        }).catch(function () { cnt.textContent = 'That photo could not be read. Try a JPG or PNG.'; });
+      });
+      var ai = el.querySelector('[data-act=alt]');
+      if (ai) ai.addEventListener('input', function () { p.image.alt = ai.value; refresh(); });
+      box.appendChild(el);
+    });
+  }
+
+  fields.forEach(function (k) {
+    $('f-' + k).addEventListener('input', function (e) {
+      thread[k] = e.target.value;
+      if (k === 'slug') slugTouched = true;
+      if (k === 'title' && !slugTouched && !editing) { thread.slug = slugify(thread.title); $('f-slug').value = thread.slug; }
+      refresh();
+    });
+  });
+  $('f-draft').addEventListener('change', function (e) { thread.draft = e.target.checked; refresh(); });
+  $('addPost').addEventListener('click', function () { thread.posts.push({ text: '', image: null }); renderPosts(); refresh(); var t = $('post-' + (thread.posts.length - 1)); if (t) t.focus(); });
+  $('newBtn').addEventListener('click', function () { if (dirty() && !confirm('Start a new thread? Unsaved changes in this form will be lost.')) return; startNew(); });
+  $('clearBtn').addEventListener('click', function () { if (!confirm('Clear everything in this form?')) return; startNew(); });
+  function startNew() { editing = null; slugTouched = false; thread = blank(); hideStatus(); fillForm(); }
+  function dirty() { return thread.title || thread.posts.some(function (p) { return p.text || p.image; }); }
+
+  // ---------- preview + counters ----------
+  var autosaveTimer;
+  function refresh() {
+    var title = thread.title.trim(), place = thread.place.trim();
+    var tl = (title + (place ? ' · ' + place : '') + ' | KJayson Travels').length;
+    $('c-title').textContent = '· ' + tl + ' / 65 on Google'; $('c-title').className = 'count' + (tl > 65 ? ' over' : '');
+    var sl = thread.summary.trim().length;
+    $('c-summary').textContent = '· ' + sl + ' / 160'; $('c-summary').className = 'count' + (sl > 160 || (sl > 0 && sl < 70) ? ' over' : '');
+    var slug = slugify(thread.slug || title);
+    $('slugHint').textContent = slug ? 'Link: …/threads/' + slug + '/' : '';
+    $('serpUrl').textContent = CFG.siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') + ' › threads › ' + (slug || '…');
+    $('serpTitle').textContent = title ? (tl <= 68 ? title + (place ? ' · ' + place : '') + ' | KJayson Travels' : title + ' | KJayson Travels') : 'Your thread title';
+    var firstText = (thread.posts.find(function (p) { return p.text.trim(); }) || { text: '' }).text;
+    var d = (thread.summary.trim() || firstText.trim()).replace(/\s+/g, ' ');
+    $('serpDesc').textContent = d ? (d.length > 158 ? d.slice(0, 155) + '…' : d) : 'Your Google description shows here.';
+    $('prevTitle').textContent = title || 'Your thread';
+    $('prevMeta').textContent = [place, thread.region, thread.country].filter(Boolean).join(' · ') + (thread.draft ? ' · Draft' : '');
+    var n = thread.posts.length;
+    $('preview').innerHTML = thread.posts.map(function (p, i) {
+      var src = p.image ? (p.image._preview || CFG.siteUrl + p.image.src) : '';
+      return '<li class="prev-post"><div class="rail"><img src="' + esc(avatar) + '" alt=""><span></span></div><div class="b"><div class="who"><strong>' + esc(CFG.author.shortName || CFG.author.name) + '</strong> ' + esc(CFG.author.handle) + ' · ' + (i + 1) + '/' + n + '</div>' +
+        (p.text.trim() ? '<p>' + esc(p.text) + '</p>' : '<p class="empty">Empty post</p>') +
+        (src ? '<figure><img src="' + esc(src) + '" alt="' + esc(p.image.alt) + '"></figure>' : '') + '</div></li>';
+    }).join('');
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(function () {
+      try {
+        var copy = JSON.parse(JSON.stringify(thread, function (k, v) { return k === '_pending' || k === '_preview' ? undefined : v; }));
+        copy.posts.forEach(function (p) { if (p.image && !p.image.src) p.image = null; });
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ thread: copy, editing: editing }));
+        $('autosave').textContent = 'Saved on this device';
+      } catch (e) {}
+    }, 600);
+  }
+
+  // ---------- publish ----------
+  var pubStatus = $('pubStatus');
+  function showStatus(msg, kind) { pubStatus.className = 'status ' + (kind || ''); pubStatus.innerHTML = msg; }
+  function hideStatus() { pubStatus.className = 'status hide'; }
+  $('publishBtn').addEventListener('click', publish);
+
+  function publish() {
+    var t = thread, errs = [];
+    var slug = slugify(t.slug || t.title);
+    if (!t.title.trim()) errs.push('Add a title.');
+    if (!t.place.trim()) errs.push('Add the place.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(t.date)) errs.push('Pick a date.');
+    if (!slug) errs.push('Add a link name.');
+    var posts = t.posts.filter(function (p) { return p.text.trim() || p.image; });
+    if (!posts.length) errs.push('Write at least one post.');
+    posts.forEach(function (p, i) { if (p.image && !String(p.image.alt || '').trim()) errs.push('Describe the photo in post ' + (i + 1) + '.'); });
+    if ((!editing || editing.slug !== slug) && existing.some(function (x) { return x.slug === slug; })) errs.push('You already have a thread at "' + slug + '". Change the link name.');
+    if (errs.length) { showStatus('<strong>Almost there:</strong><br>' + errs.map(esc).join('<br>'), 'err'); return; }
+
+    var btn = $('publishBtn'); btn.disabled = true; btn.textContent = 'Publishing…';
+    showStatus('Uploading photos and saving your thread…');
+    var files = [], stamp = Date.now().toString(36), ogPath = null, jobs = [];
+    var out = {
+      slug: slug, title: t.title.trim(), summary: t.summary.trim(), place: t.place.trim(), region: t.region.trim(), country: t.country.trim(),
+      date: t.date, updated: editing ? today() : t.date, tags: t.tags.split(',').map(function (x) { return x.trim(); }).filter(Boolean), draft: !!t.draft,
+      posts: []
+    };
+    if (editing && editing.ogImage) out.ogImage = editing.ogImage;
+    posts.forEach(function (p, i) {
+      var post = { text: p.text.trim() };
+      if (p.image) {
+        if (p.image._pending) {
+          var base = 'images/' + slug + '/' + stamp + '-' + (i + 1);
+          var pend = p.image._pending;
+          post.image = { src: base + '-1600.webp', src800: base + '-800.webp', width: p.image.width, height: p.image.height, alt: p.image.alt.trim() };
+          jobs.push(blobToB64(pend.b1600).then(function (b) { files.push({ path: base + '-1600.webp', base64: b }); }));
+          jobs.push(blobToB64(pend.b800).then(function (b) { files.push({ path: base + '-800.webp', base64: b }); }));
+          if (!ogPath && !out.ogImage) { ogPath = 'images/' + slug + '/' + stamp + '-share.jpg'; out.ogImage = ogPath; jobs.push(blobToB64(pend.og).then(function (b) { files.push({ path: ogPath, base64: b }); })); }
+        } else {
+          post.image = { src: p.image.src, src800: p.image.src800, width: p.image.width, height: p.image.height, alt: p.image.alt.trim() };
+        }
+      }
+      out.posts.push(post);
+    });
+    Promise.all(jobs).then(function () {
+      files.push({ path: 'content/threads/' + slug + '.json', base64: b64utf8(JSON.stringify(out, null, 2) + '\n') });
+      if (editing && editing.slug && editing.slug !== slug) files.push({ path: 'content/threads/' + editing.slug + '.json', remove: true });
+      return commitFiles(files, (editing ? 'Update thread: ' : 'New thread: ') + out.title);
+    }).then(function () {
+      var url = CFG.siteUrl + 'threads/' + slug + '/';
+      showStatus(out.draft ? '<strong>Saved as a draft.</strong> It stays hidden from the site.' :
+        '<strong>Published!</strong> Your thread goes live in about a minute at<br><a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(url) + '</a>', 'ok');
+      editing = { slug: slug, ogImage: out.ogImage };
+      thread.slug = slug;
+      thread.posts = out.posts.map(function (p, i) { var keep = posts[i]; return { text: p.text, image: p.image ? Object.assign({}, p.image, keep && keep.image && keep.image._preview ? { _preview: keep.image._preview } : {}) : null }; });
+      fillForm(); loadList();
+    }).catch(function (e) {
+      showStatus('<strong>Could not publish.</strong> ' + esc(e.message) + (/401|403/.test(e.message) ? '<br>Your token may have expired or lacks Contents: Read and write. Disconnect and connect again.' : ''), 'err');
+    }).then(function () { btn.disabled = false; btn.textContent = 'Publish thread'; });
+  }
+
+  // ---------- list + load ----------
+  function loadList() {
+    var box = $('threadList');
+    return gh('GET', '/repos/' + O + '/' + R + '/contents/content/threads?ref=' + B).then(function (items) {
+      items = (items || []).filter(function (x) { return /\.json$/.test(x.name); });
+      return Promise.all(items.map(function (it) {
+        return gh('GET', '/repos/' + O + '/' + R + '/contents/' + it.path + '?ref=' + B).then(function (f) {
+          try { var j = JSON.parse(fromB64utf8(f.content)); return { path: it.path, slug: j.slug || it.name.replace(/\.json$/, ''), title: j.title || it.name, date: j.date || '', draft: !!j.draft, data: j }; } catch (e) { return null; }
+        });
+      }));
+    }).then(function (list) {
+      existing = (list || []).filter(Boolean).sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
+      if (!existing.length) { box.innerHTML = '<p class="hint">No threads yet. Your first one will show here.</p>'; return; }
+      box.innerHTML = '';
+      existing.forEach(function (x) {
+        var b = document.createElement('button'); b.type = 'button';
+        b.innerHTML = '<span><strong>' + esc(x.title) + '</strong><br><span class="hint">' + esc(x.date) + '</span></span><span class="pill' + (x.draft ? ' draft' : '') + '">' + (x.draft ? 'Draft' : 'Live') + '</span>';
+        b.addEventListener('click', function () {
+          if (dirty() && !confirm('Open "' + x.title + '"? Unsaved changes in this form will be lost.')) return;
+          var j = x.data;
+          editing = { slug: x.slug, ogImage: j.ogImage || null }; slugTouched = true;
+          thread = { title: j.title || '', place: j.place || '', region: j.region || '', country: j.country || '', date: j.date || today(), summary: j.summary || '', tags: (j.tags || []).join(', '), slug: x.slug, draft: !!j.draft,
+            posts: (j.posts || []).map(function (p) { return { text: p.text || '', image: p.image ? Object.assign({}, p.image) : null }; }) };
+          if (!thread.posts.length) thread.posts = [{ text: '', image: null }];
+          hideStatus(); fillForm(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        box.appendChild(b);
+      });
+    }).catch(function (e) { box.innerHTML = '<p class="hint">Could not load your threads: ' + esc(e.message) + '</p>'; });
+  }
+
+  // ---------- connect ----------
+  function connect() {
+    $('connectMsg').textContent = 'Checking…';
+    return gh('GET', '/repos/' + O + '/' + R).then(function (repo) {
+      if (!repo) throw new Error('This token cannot see ' + O + '/' + R + '. Check the repository access step.');
+      if (repo.permissions && !repo.permissions.push) throw new Error('This token can read but not write. Set Contents to Read and write.');
+      try { localStorage.setItem(TOKEN_KEY, token); } catch (e) {}
+      $('connect').classList.add('hide'); $('app').classList.remove('hide'); $('disconnectBtn').classList.remove('hide');
+      $('whoami').textContent = 'Saving to ' + O + '/' + R;
+      var saved = null; try { saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); } catch (e) {}
+      if (saved && saved.thread) { thread = saved.thread; editing = saved.editing || null; slugTouched = !!thread.slug; if (!thread.posts || !thread.posts.length) thread.posts = [{ text: '', image: null }]; }
+      fillForm(); loadList();
+    }).catch(function (e) {
+      $('connectMsg').textContent = e.message;
+      showConnect();
+    });
+  }
+  function showConnect() { $('connect').classList.remove('hide'); $('app').classList.add('hide'); $('disconnectBtn').classList.add('hide'); }
+  $('connectBtn').addEventListener('click', function () { token = $('tokenInput').value.trim(); if (!token) { $('connectMsg').textContent = 'Paste your token first.'; return; } connect(); });
+  $('disconnectBtn').addEventListener('click', function () { if (!confirm('Disconnect this device? You will need your token again to publish.')) return; try { localStorage.removeItem(TOKEN_KEY); } catch (e) {} token = null; $('tokenInput').value = ''; $('connectMsg').textContent = ''; showConnect(); });
+  window.addEventListener('beforeunload', function (e) { if (thread.posts.some(function (p) { return p.image && p.image._pending; })) { e.preventDefault(); e.returnValue = ''; } });
+
+  if (token) connect(); else showConnect();
+})();
+</script>
+</body>
+</html>

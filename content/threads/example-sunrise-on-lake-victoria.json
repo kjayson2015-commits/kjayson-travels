@@ -1,0 +1,17 @@
+{
+  "slug": "example-sunrise-on-lake-victoria",
+  "title": "Sunrise on Lake Victoria, and every spot after it",
+  "summary": "EXAMPLE THREAD (hidden draft): replace with your own trip. A morning in Kisumu: the 6am ride to the lake, Dunga Beach at golden hour and lunch by the water.",
+  "place": "Kisumu",
+  "region": "Lake Victoria",
+  "country": "Kenya",
+  "date": "2026-10-18",
+  "updated": "2026-10-18",
+  "tags": ["sunrise", "lake", "photography"],
+  "draft": true,
+  "posts": [
+    { "text": "Took the 6am ride out of Kisumu to catch sunrise on the lake. Worth every yawn. Here are the spots I found, in order:" },
+    { "text": "Dunga Beach at golden hour. Ask the fishermen first and they'll let you photograph the boats coming in." },
+    { "text": "Lunch by the water: fresh tilapia and ugali. Sit facing west." }
+  ]
+}

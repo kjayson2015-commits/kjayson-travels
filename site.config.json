@@ -1,0 +1,22 @@
+{
+  "siteName": "KJayson Travels",
+  "siteUrl": "https://kjayson2015-commits.github.io/kjayson-travels/",
+  "language": "en",
+  "tagline": "Field notes from trips and fun, written as threads.",
+  "description": "Travel threads by Jayson Kemboi: trips, food, places and fun spots, with real photos and honest, practical tips.",
+  "googleSiteVerification": "",
+  "author": {
+    "name": "Jayson Kemboi",
+    "shortName": "Jayson",
+    "handle": "@kjayson_",
+    "bio": "Photographer and BSc ICTM & AI student at Maseno University. I travel, take pictures and write about the details people miss.",
+    "x": "https://x.com/kjayson_",
+    "facebook": "",
+    "website": "https://kjayson.online"
+  },
+  "repo": {
+    "owner": "kjayson2015-commits",
+    "name": "kjayson-travels",
+    "branch": "main"
+  }
+}
