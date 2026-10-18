@@ -133,7 +133,7 @@ ${article.tags.map((t) => `<meta property="article:tag" content="${esc(t)}">`).j
 <link rel="stylesheet" href="${FONTS}">
 <style>${CSS}</style>
 ${jsonld.length ? ld({ '@context': 'https://schema.org', '@graph': jsonld }) : ''}
-<script>window.KJT=${JSON.stringify({ host: HOST, track, sb: { url: SB.url, key: SB.publishableKey } }).replace(/</g, '\\u003c')}</script>
+<script>window.KJT=${JSON.stringify({ host: HOST, track, sb: { url: SB.url, key: SB.publishableKey }, gid: cfg.googleClientId || '', owner: CONTACT.email || '' }).replace(/</g, '\\u003c')}</script>
 <script src="${u('/assets/site.js')}" defer></script>
 </head>
 <body>
@@ -160,6 +160,7 @@ ${A.x ? `<a href="${esc(A.x)}" rel="me noopener">X ${esc(A.handle)}</a>` : ''}
 ${A.facebook ? `<a href="${esc(A.facebook)}" rel="me noopener">Facebook</a>` : ''}
 ${A.website ? `<a href="${esc(A.website)}" rel="me noopener">Photos</a>` : ''}
 <a href="${u('/contact/')}">Contact</a>
+<a href="${u('/privacy/')}">Privacy</a>
 <a href="${u('/feed.xml')}">RSS</a>
 </nav>
 </div></footer>
@@ -358,6 +359,31 @@ ${A.x ? `<div class="contact-card"><h2>X</h2><a class="big" href="${esc(A.x)}" r
 </div></div>`,
 }));
 
+
+// Privacy policy (required for Google sign-in)
+write('privacy/index.html', page({
+  title: `Privacy · ${cfg.siteName}`,
+  description: clip(`How ${cfg.siteName} handles visits, likes, replies and Google sign-in.`, 158),
+  pathName: '/privacy/',
+  jsonld: [WEBSITE, PERSON, { '@type': 'WebPage', url: abs('/privacy/'), name: 'Privacy policy', isPartOf: { '@id': WEBSITE['@id'] } }],
+  body: `<div class="narrow prose"><h1>Privacy</h1>
+<p class="muted">Last updated ${fmtDate(new Date().toISOString().slice(0, 10))}</p>
+<p>${esc(cfg.siteName)} is a personal travel site run by ${esc(A.name)}. This page explains what the site keeps and why. ${esc(NOTICE)}.</p>
+<h2>Visits</h2>
+<p>When you open a page, the site counts the visit: the page address, its title, the website that sent you (if any), and whether you're on a phone, tablet or computer. A random code saved in your browser lets the site tell repeat visits from new visitors. Your IP address, name and email are not stored for visits.</p>
+<h2>Likes</h2>
+<p>A like is saved with the same random browser code so you can unlike it later.</p>
+<h2>Replies</h2>
+<p>Replies are public. If you reply without signing in, your reply shows a label like "Chrome on Android" based on your browser. Your browser keeps a private key that lets only you edit or delete that reply.</p>
+<h2>Sign in with Google</h2>
+<p>If you choose "Continue with Google", Google shares your name, profile photo and email address with this site. Your <strong>name and photo</strong> are shown on your replies. Your <strong>email is never shown</strong> to anyone and is only used to sign you in. You can sign out at any time from the reply box, and remove the site's access in your <a href="https://myaccount.google.com/connections" rel="noopener">Google Account connections</a>.</p>
+<h2>Where it's stored</h2>
+<p>Visits, likes, replies and sign-ins are stored with Supabase, a database service. Pages are hosted by GitHub Pages. Fonts load from Google Fonts. Nothing is sold or shared for advertising.</p>
+<h2>Removing your data</h2>
+<p>Delete any reply yourself from its ⋯ menu, or email <a href="mailto:${esc(CONTACT.email)}">${esc(CONTACT.email)}</a> and ask for your replies or sign-in to be removed.</p>
+</div>`,
+}));
+
 // Dashboard (private link, never indexed, not counted)
 write('dashboard/index.html', page({
   title: `Dashboard · ${cfg.siteName}`,
@@ -422,6 +448,7 @@ const urls = [
   { loc: abs('/places/'), lastmod: NOW, pri: '0.5' },
   { loc: abs('/about/'), lastmod: NOW, pri: '0.5' },
   { loc: abs('/contact/'), lastmod: NOW, pri: '0.5' },
+  { loc: abs('/privacy/'), lastmod: NOW, pri: '0.2' },
 ];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">

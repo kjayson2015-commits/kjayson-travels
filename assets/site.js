@@ -24,9 +24,30 @@
   if (!C.sb || !C.sb.url || !C.sb.key) return;
   var API = C.sb.url.replace(/\/$/, '') + '/rest/v1/';
   var H = { apikey: C.sb.key, 'Content-Type': 'application/json' };
+  // ---------- Google sign-in session ----------
+  var SESSION_KEY = 'kjt-session';
+  var session = null; try { session = JSON.parse(store.get(SESSION_KEY) || 'null'); } catch (e) {}
+  function saveSession(s) { session = s; if (s) store.set(SESSION_KEY, JSON.stringify(s)); else { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} } }
+  function authUrl(p) { return C.sb.url.replace(/\/$/, '') + '/auth/v1/' + p; }
+  function sessionFrom(j) {
+    var m = (j.user && j.user.user_metadata) || {};
+    return { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: (j.expires_at || (Date.now() / 1000 + (j.expires_in || 3600))),
+      user: { name: m.full_name || m.name || 'Google user', avatar: m.avatar_url || m.picture || '', email: (j.user && j.user.email) || '' } };
+  }
+  function freshToken() {
+    if (!session) return Promise.resolve(null);
+    if (session.expires_at - 60 > Date.now() / 1000) return Promise.resolve(session.access_token);
+    return fetch(authUrl('token?grant_type=refresh_token'), { method: 'POST', headers: H, body: JSON.stringify({ refresh_token: session.refresh_token }) })
+      .then(function (r) { if (!r.ok) throw new Error('expired'); return r.json(); })
+      .then(function (j) { saveSession(sessionFrom(j)); return session.access_token; })
+      .catch(function () { saveSession(null); if (window.KJT_onAuth) window.KJT_onAuth(); return null; });
+  }
   function api(path, opts) {
     opts = opts || {};
-    return fetch(API + path, { method: opts.method || 'GET', headers: Object.assign({}, H, opts.headers || {}), body: opts.body ? JSON.stringify(opts.body) : undefined })
+    return freshToken().then(function (tok) {
+      var hdr = Object.assign({}, H, opts.headers || {}); if (tok) hdr.Authorization = 'Bearer ' + tok;
+      return fetch(API + path, { method: opts.method || 'GET', headers: hdr, body: opts.body ? JSON.stringify(opts.body) : undefined });
+    })
       .then(function (r) {
         if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.message || ('Error ' + r.status)); });
         return r.status === 204 || r.status === 201 && opts.minimal ? null : r.json();
@@ -90,8 +111,59 @@
   };
   var fmtN = function (n) { return !n ? '' : n < 1000 ? String(n) : (n / 1000).toFixed(n < 10000 ? 1 : 0).replace(/\.0$/, '') + 'K'; };
 
-  var me = form.querySelector('[data-me]'); me.textContent = initial(asName); me.style.background = hue(asName);
-  form.querySelector('[data-asname]').textContent = asName;
+  var me = form.querySelector('[data-me]'), asEl = form.querySelector('[data-asname]'), authSlot = document.createElement('span');
+  authSlot.className = 'x-auth'; asEl.parentNode.appendChild(authSlot);
+  function paintMe() {
+    me.innerHTML = ''; me.style.background = '';
+    if (session) {
+      if (session.user.avatar) { var im = document.createElement('img'); im.src = session.user.avatar; im.alt = ''; im.referrerPolicy = 'no-referrer'; me.appendChild(im); me.style.background = 'transparent'; }
+      else { me.textContent = initial(session.user.name); me.style.background = hue(session.user.name); }
+      asEl.textContent = session.user.name;
+      authSlot.innerHTML = ' · <button type="button" class="x-link" data-signout>Sign out</button>';
+      window.KJT_OWNER = !!C.owner && session.user.email.toLowerCase() === C.owner.toLowerCase();
+    } else {
+      me.textContent = initial(asName); me.style.background = hue(asName); asEl.textContent = asName;
+      authSlot.innerHTML = ''; window.KJT_OWNER = false;
+      if (C.gid) { var gb = document.createElement('span'); gb.className = 'x-gbtn'; authSlot.appendChild(gb); renderGoogleButton(gb); }
+    }
+  }
+  var rawNonce = null, hashedNonce = null, gisReady = null;
+  function makeNonce() {
+    var a = new Uint8Array(16); crypto.getRandomValues(a); rawNonce = Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawNonce)).then(function (d) {
+      hashedNonce = Array.prototype.map.call(new Uint8Array(d), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    });
+  }
+  function loadGis() {
+    if (gisReady) return gisReady;
+    gisReady = Promise.all([makeNonce(), new Promise(function (res, rej) {
+      var sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc);
+    })]).then(function () {
+      google.accounts.id.initialize({ client_id: C.gid, callback: onGoogle, nonce: hashedNonce, auto_select: false, cancel_on_tap_outside: true, context: 'signin', itp_support: true, use_fedcm_for_prompt: true });
+    });
+    return gisReady;
+  }
+  function renderGoogleButton(el) {
+    loadGis().then(function () {
+      google.accounts.id.renderButton(el, { type: 'standard', shape: 'pill', text: 'continue_with', size: 'medium', theme: root.getAttribute('data-theme') === 'dark' ? 'filled_black' : 'outline', logo_alignment: 'left' });
+    }).catch(function () {});
+  }
+  function onGoogle(resp) {
+    msg.className = 'c-msg'; msg.textContent = 'Signing you in…';
+    fetch(authUrl('token?grant_type=id_token'), { method: 'POST', headers: H, body: JSON.stringify({ provider: 'google', id_token: resp.credential, nonce: rawNonce }) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.msg || j.error_description || 'Sign-in failed'); return j; }); })
+      .then(function (j) { saveSession(sessionFrom(j)); msg.className = 'c-msg ok'; msg.textContent = 'Signed in as ' + session.user.name + '.'; paintMe(); if (window.KJT_onAuth) window.KJT_onAuth(); setTimeout(function () { if (/^Signed in/.test(msg.textContent)) msg.textContent = ''; }, 3000); })
+      .catch(function (e) { msg.className = 'c-msg err'; msg.textContent = 'Google sign-in didn’t work: ' + e.message; makeNonce().then(function () { google.accounts.id.initialize({ client_id: C.gid, callback: onGoogle, nonce: hashedNonce, auto_select: false, cancel_on_tap_outside: true, context: 'signin', itp_support: true, use_fedcm_for_prompt: true }); }); });
+  }
+  authSlot.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-signout]')) return;
+    var tok = session && session.access_token;
+    if (tok) fetch(authUrl('logout'), { method: 'POST', headers: Object.assign({}, H, { Authorization: 'Bearer ' + tok }) }).catch(function () {});
+    saveSession(null); try { google.accounts.id.disableAutoSelect(); } catch (er) {}
+    paintMe(); if (window.KJT_onAuth) window.KJT_onAuth();
+  });
+  paintMe();
+  if (!session && C.gid) loadGis().then(function () { google.accounts.id.prompt(); }).catch(function () {});
 
   // likes
   function paintLike(btn) {
@@ -258,9 +330,10 @@
     document.querySelectorAll('.x-reply .act-like').forEach(paintLike);
   }
 
-  api('rpc/travel_list_replies', { method: 'POST', body: { p_slug: slug } })
+  function loadReplies() {
+  return api('rpc/travel_list_replies', { method: 'POST', body: { p_slug: slug } })
     .then(function (rows) {
-      (rows || []).forEach(function (r) { byId[r.id] = r; });
+      byId = {}; (rows || []).forEach(function (r) { byId[r.id] = r; });
       render();
       var keys = []; for (var i = 1; i <= nPosts; i++) keys.push(slug + '#p' + i);
       Object.keys(byId).forEach(function (id) { keys.push(slug + '#r' + id); });
@@ -268,6 +341,9 @@
     })
     .then(function () { if (/^#reply-\d+$/.test(location.hash)) { var el = document.querySelector(location.hash); if (el) { el.classList.add('fresh'); el.scrollIntoView({ block: 'center' }); } } })
     .catch(function () { list.innerHTML = '<li class="muted x-empty">Replies could not load right now.</li>'; });
+  }
+  loadReplies();
+  window.KJT_onAuth = function () { resetComposer(); loadReplies(); };
 
   // reply buttons on replies, menus, edit, delete
   box.addEventListener('click', function (e) {
