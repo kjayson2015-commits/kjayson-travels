@@ -1,18 +1,31 @@
 {
   "siteName": "KJayson Travels",
-  "siteUrl": "https://kjayson2015-commits.github.io/kjayson-travels/",
+  "siteUrl": "https://kjaysontravels.com/",
   "language": "en",
   "tagline": "Field notes from trips and fun, written as threads.",
   "description": "Travel threads by Jayson Kemboi: trips, food, places and fun spots, with real photos and honest, practical tips.",
   "googleSiteVerification": "",
+  "indexNowKey": "b002f8795c139f728a88ea69c6536068",
+  "notice": "Not a travel agent",
   "author": {
     "name": "Jayson Kemboi",
     "shortName": "Jayson",
     "handle": "@kjayson_",
-    "bio": "Photographer and BSc ICTM & AI student at Maseno University. I travel, take pictures and write about the details people miss.",
+    "bio": "Not a travel agent.",
     "x": "https://x.com/kjayson_",
     "facebook": "",
     "website": "https://kjayson.online"
+  },
+  "contact": {
+    "email": "kjayson2015@gmail.com",
+    "phones": [
+      "254112070612",
+      "254111378630"
+    ]
+  },
+  "supabase": {
+    "url": "https://viyipqfydmftcpdvntqf.supabase.co",
+    "publishableKey": "sb_publishable_bnFIkrjmcDX9xi3f1NAxLQ_K9fbTIhL"
   },
   "repo": {
     "owner": "kjayson2015-commits",
