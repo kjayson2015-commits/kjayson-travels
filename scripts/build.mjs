@@ -181,7 +181,10 @@ function stamp(t, ink = false) {
   return `<a class="stamp${ink ? ' ink' : ''}" href="${u(`/places/${t.placeSlug}/`)}" aria-label="More threads from ${esc(t.place)}">${esc(t.place)}${line2 ? `<br>${esc(line2)}` : ''}<br>${esc(new Date(t.date + 'T12:00:00Z').toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }))}</a>`;
 }
 
-function postsHtml(t, { limit = Infinity, headingLevel = 'h1' } = {}) {
+const REPLY_ICON = `<svg class="reply-ico" width="20" height="18" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg>`;
+const HEART_ICON = `<svg class="heart-ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/></svg>`;
+const SHARE_ICON = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>`;
+function postsHtml(t, { limit = Infinity, headingLevel = 'h1', actions = false } = {}) {
   const n = t.posts.length;
   return `<ol class="thread">${t.posts.slice(0, limit).map((p, i) => `
 <li class="post" id="post-${i + 1}">
@@ -190,6 +193,11 @@ function postsHtml(t, { limit = Infinity, headingLevel = 'h1' } = {}) {
 <div class="who"><strong>${esc(A.shortName || A.name)}</strong><a href="${esc(A.x || '#')}" rel="noopener">${esc(A.handle)}</a><span>· <a href="#post-${i + 1}" aria-label="Post ${i + 1} of ${n}">${i + 1}/${n}</a></span></div>
 ${plain(p.text) ? `<div class="text">${textToHtml(p.text)}</div>` : ''}
 ${figure(p.image, { eager: i === 0 && headingLevel === 'h1' })}
+${actions ? `<div class="acts" data-key="${esc(t.slug)}#p${i + 1}" data-post="${i + 1}" role="group" aria-label="Actions for post ${i + 1}">
+<button class="act act-reply" type="button" data-act="reply" aria-label="Reply to post ${i + 1}">${REPLY_ICON}<span data-rc></span></button>
+<button class="act act-like" type="button" data-act="like" aria-pressed="false" aria-label="Like post ${i + 1}">${HEART_ICON}<span data-lc></span></button>
+<button class="act act-share" type="button" data-act="share" data-url="${abs(t.url)}#post-${i + 1}" aria-label="Share post ${i + 1}">${SHARE_ICON}</button>
+</div>` : ''}
 </div>
 </li>`).join('')}</ol>`;
 }
@@ -261,9 +269,8 @@ for (const t of threads) {
 <article>
 <header class="t-head">${stamp(t)}<div class="t-head-main"><p class="kicker">Thread · ${t.posts.length} posts</p><h1>${esc(t.title)}</h1>
 <div class="byline"><img src="${u('/assets/avatar.webp')}" alt="" width="28" height="28"><a href="${u('/about/')}" rel="author">${esc(A.name)}</a><time datetime="${t.date}">${fmtDate(t.date)}</time>${t.updated !== t.date ? `<span>Updated <time datetime="${t.updated}">${fmtDate(t.updated)}</time></span>` : ''}<span>${Math.max(1, Math.round(t.words / 200))} min read</span></div></div></header>
-${postsHtml(t)}
+${postsHtml(t, { actions: true })}
 ${t.tags.length ? `<ul class="tags" aria-label="Topics">${t.tags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-<div class="react"><button class="btn like-btn" id="likeBtn" type="button" data-slug="${esc(t.slug)}" aria-pressed="false" aria-label="Like this thread"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/></svg><span data-count>0</span><span>Like</span></button><a class="btn" href="#comments"><svg class="reply-ico" width="22" height="20" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg><span>Reply</span></a></div>
 <div class="share"><span>Share this thread</span>
 <a class="btn solid" href="https://x.com/intent/post?text=${shareText}&url=${shareUrl}&via=${encodeURIComponent((A.handle || '').replace('@', ''))}" rel="noopener" target="_blank">Post on X</a>
 <a class="btn" href="https://wa.me/?text=${shareText}%20${shareUrl}" rel="noopener" target="_blank">WhatsApp</a>
@@ -271,11 +278,21 @@ ${t.tags.length ? `<ul class="tags" aria-label="Topics">${t.tags.map((x) => `<li
 <button class="btn" type="button" data-copy="${abs(t.url)}">Copy link</button>
 </div>
 </article>
-<section class="comments" id="comments" data-slug="${esc(t.slug)}" aria-labelledby="c-title"><h2 id="c-title"><svg class="reply-ico" width="22" height="20" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg> Replies <span class="muted" data-ccount></span></h2>
-<ol class="c-list" aria-live="polite"><li class="muted">Loading replies…</li></ol>
-<form class="c-form" novalidate><div><label for="c-body">Write a reply</label><textarea id="c-body" name="body" rows="3" maxlength="1000" placeholder="Say something about this thread…" required></textarea></div>
-<div class="hp" aria-hidden="true"><label for="c-web">Website</label><input id="c-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><button class="btn solid" type="submit"><svg class="reply-ico" width="22" height="20" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg><span>Post reply</span></button><span class="muted" style="font-size:14px">Posting as <strong data-asname>a visitor</strong> · no sign-up</span><span class="c-msg" role="status"></span></div></form></section>
+<section class="x-replies" id="replies" data-slug="${esc(t.slug)}" data-posts="${t.posts.length}" aria-labelledby="r-title">
+<h2 id="r-title">${REPLY_ICON} Replies <span class="muted" data-rtotal></span></h2>
+<form class="x-compose" id="composer" novalidate>
+<div class="x-av" data-me aria-hidden="true">?</div>
+<div class="x-cbody">
+<p class="x-replying">Replying to <a href="${esc(A.x || '#')}" rel="noopener">${esc(A.handle)}</a><span data-to></span></p>
+<label class="sr" for="r-body">Post your reply</label>
+<textarea id="r-body" name="body" rows="2" maxlength="1000" placeholder="Post your reply"></textarea>
+<div class="hp" aria-hidden="true"><label for="r-web">Website</label><input id="r-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+<div class="x-cbar"><span class="muted" style="font-size:14px">as <strong data-asname>a visitor</strong></span><span class="x-right"><span class="x-count" data-chars>0/1000</span><button class="x-pill" type="submit" disabled>Reply</button></span></div>
+<p class="c-msg" role="status"></p>
+</div>
+</form>
+<ol class="x-list" aria-live="polite"><li class="muted x-empty">Loading replies…</li></ol>
+</section>
 ${related.length ? `<h2 class="section-title">More threads</h2><div class="cards">${related.map(card).join('')}</div>` : ''}
 ${idx < threads.length - 1 ? `<p><a class="more" href="${u(threads[idx + 1].url)}" rel="prev">← Older: ${esc(threads[idx + 1].title)}</a></p>` : ''}
 ${idx > 0 ? `<p><a class="more" href="${u(threads[idx - 1].url)}" rel="next">Newer: ${esc(threads[idx - 1].title)} →</a></p>` : ''}

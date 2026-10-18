@@ -141,3 +141,47 @@ img{max-width:100%;height:auto;display:block}
 .reply-ico{display:inline-block;vertical-align:-3px;flex-shrink:0}
 .comments h2 .reply-ico{width:30px;height:27px;vertical-align:-4px;margin-right:4px}
 .c-item .c-who{display:inline-flex;align-items:center;gap:6px}
+/* X-style actions */
+:root{--like:#F91880;--reply:#1D9BF0}
+.acts{display:flex;gap:4px;margin:8px 0 0 -10px;max-width:420px;justify-content:space-between}
+.act{display:inline-flex;align-items:center;gap:6px;min-height:40px;min-width:44px;padding:0 10px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;transition:color .15s,background .15s}
+.act span:empty{display:none}
+.act-reply:hover,.act-reply:focus-visible{color:var(--reply);background:rgba(29,155,240,.12)}
+.act-like:hover,.act-like:focus-visible{color:var(--like);background:rgba(249,24,128,.12)}
+.act-share:hover,.act-share:focus-visible{color:var(--reply);background:rgba(29,155,240,.12)}
+.act-like[aria-pressed=true]{color:var(--like)}
+.act-like[aria-pressed=true] .heart-ico{fill:currentColor;animation:pop .35s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.act .reply-ico{width:20px;height:18px}
+/* replies */
+.x-replies{margin-top:12px;border-top:1px solid var(--line)}
+.x-replies h2{font-family:var(--serif);font-size:26px;margin:24px 0 10px;display:flex;align-items:center;gap:8px}
+.x-replies h2 .reply-ico{width:28px;height:25px}
+.x-compose{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:12px;padding:14px 0 16px;border-bottom:1px solid var(--line)}
+.x-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;background:#6B7A70;flex-shrink:0;text-transform:uppercase}
+.x-replying{margin:0 0 4px;font-size:14.5px;color:var(--muted)}
+.x-replying a{color:var(--reply);text-decoration:none}
+.x-compose textarea{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-size:19px;line-height:1.45;resize:none;padding:6px 0;min-height:52px}
+.x-compose textarea:focus{outline:none}
+.x-compose:focus-within{border-bottom-color:var(--reply)}
+.x-cbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding-top:10px}
+.x-right{display:flex;align-items:center;gap:12px}
+.x-count{font-size:13px;color:var(--muted)}
+.x-pill{min-height:40px;padding:0 20px;border:0;border-radius:999px;background:var(--ink);color:var(--bg);font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.x-pill[disabled]{opacity:.45;cursor:default}
+.x-compose .c-msg{margin:6px 0 0}
+.x-compose .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.x-list{list-style:none;margin:0;padding:0}
+.x-reply{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:12px;padding:14px 0 6px;border-bottom:1px solid var(--line)}
+.x-reply.fresh{animation:fade 1.2s ease}
+@keyframes fade{from{background:rgba(29,155,240,.12)}to{background:transparent}}
+.x-rhead{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:baseline;font-size:15px}
+.x-rhead strong{color:var(--ink)}
+.x-rhead span{color:var(--muted)}
+.x-rto{font-size:14px;color:var(--muted);margin:1px 0 0}
+.x-rto a{color:var(--reply);text-decoration:none}
+.x-rtext{margin:4px 0 0;font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.x-empty{padding:18px 0}
+.post.flash .body{animation:fade 1.4s ease;border-radius:12px}
+.x-reply .acts{max-width:200px;margin-top:4px}

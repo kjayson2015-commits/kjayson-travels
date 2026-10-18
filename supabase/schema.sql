@@ -125,3 +125,14 @@ grant execute on function public.travel_like_counts() to anon, authenticated;
 grant execute on function public.travel_stats(int) to anon, authenticated;
 grant select, insert on public.travel_comments to anon, authenticated;
 grant insert on public.travel_page_views to anon, authenticated;
+
+-- v2: X-style threads. Replies can point at one post; likes work per post and per reply.
+alter table public.travel_comments add column if not exists post_index smallint check (post_index between 1 and 200);
+create or replace function public.travel_like_states(p_keys text[], p_visitor text)
+returns json language sql stable security definer set search_path = public as $$
+  select coalesce(json_object_agg(k, json_build_object(
+    'count', (select count(*) from public.travel_likes l where l.thread_slug = k),
+    'liked', exists (select 1 from public.travel_likes l where l.thread_slug = k and l.visitor_id = p_visitor))), '{}'::json)
+  from (select distinct unnest(p_keys[1:300]) as k) keys;
+$$;
+grant execute on function public.travel_like_states(text[], text) to anon, authenticated;
