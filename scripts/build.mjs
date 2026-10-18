@@ -74,7 +74,9 @@ const route = [...places.values()].sort((a, b) => a.threads[a.threads.length - 1
 
 // ---------- shared pieces ----------
 const CSS = fs.readFileSync(path.join(ROOT, 'assets', 'site.css'), 'utf8').replace(/\n/g, '');
-const FONTS = 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;600&display=swap';
+const FONT_FILES = [['Fraunces', 500, 'normal', 'fraunces-latin-500-normal'], ['Fraunces', 700, 'normal', 'fraunces-latin-700-normal'], ['Fraunces', 500, 'italic', 'fraunces-latin-500-italic'], ['Work Sans', 400, 'normal', 'work-sans-latin-400-normal'], ['Work Sans', 600, 'normal', 'work-sans-latin-600-normal']];
+const FONT_CSS = FONT_FILES.map(([fam, w, st, f]) => `@font-face{font-family:'${fam}';font-style:${st};font-weight:${w};font-display:swap;src:url(${u('/assets/fonts/' + f + '.woff2')}) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}`).join('');
+const FONT_PRELOAD = ['work-sans-latin-400-normal', 'fraunces-latin-700-normal', 'fraunces-latin-500-italic'].map((f) => `<link rel="preload" href="${u('/assets/fonts/' + f + '.woff2')}" as="font" type="font/woff2" crossorigin>`).join('\n');
 const sameAs = [A.x, A.facebook, A.website].filter(Boolean);
 const CONTACT = cfg.contact || { phones: [], email: '' };
 const NOTICE = cfg.notice || 'Not a travel agent';
@@ -113,6 +115,8 @@ ${cfg.googleSiteVerification ? `<meta name="google-site-verification" content="$
 <meta property="og:url" content="${canonical}">
 <meta property="og:image" content="${esc(ogImg)}">
 <meta property="og:image:alt" content="${esc(imageAlt || cfg.siteName)}">
+${!image || image === DEFAULT_OG || /share\.jpg$/.test(image) ? '<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">' : ''}
+<meta name="twitter:image:alt" content="${esc(imageAlt || cfg.siteName)}">
 ${article ? `<meta property="article:published_time" content="${article.published}">
 <meta property="article:modified_time" content="${article.modified}">
 <meta property="article:author" content="${abs('/about/')}">
@@ -128,10 +132,9 @@ ${article.tags.map((t) => `<meta property="article:tag" content="${esc(t)}">`).j
 <link rel="apple-touch-icon" href="${u('/assets/apple-touch-icon.png')}">
 <link rel="manifest" href="${u('/site.webmanifest')}">
 <link rel="alternate" type="application/rss+xml" title="${esc(cfg.siteName)}" href="${u('/feed.xml')}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="${FONTS}">
-<style>${CSS}</style>
+${FONT_PRELOAD}
+${SB.url ? `<link rel="preconnect" href="${esc(SB.url)}" crossorigin>` : ''}
+<style>${FONT_CSS}${CSS}</style>
 ${jsonld.length ? ld({ '@context': 'https://schema.org', '@graph': jsonld }) : ''}
 <script>window.KJT=${JSON.stringify({ host: HOST, track, sb: { url: SB.url, key: SB.publishableKey }, gid: cfg.googleClientId || '', owner: CONTACT.email || '' }).replace(/</g, '\\u003c')}</script>
 <script src="${u('/assets/site.js')}" defer></script>
@@ -139,7 +142,7 @@ ${jsonld.length ? ld({ '@context': 'https://schema.org', '@graph': jsonld }) : '
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top"><div class="wrap">
-<a class="logo" href="${u('/')}"><img src="${u('/assets/avatar.webp')}" alt="" width="36" height="36">${esc(cfg.siteName)}</a>
+<a class="logo" href="${u('/')}"><img src="${u('/assets/avatar-96.webp')}" alt="" width="36" height="36">${esc(cfg.siteName)}</a>
 <div class="top-actions">
 <nav class="nav" aria-label="Main">
 <a href="${u('/')}"${nav === 'home' ? ' aria-current="page"' : ''}>Threads</a>
@@ -185,15 +188,15 @@ function stamp(t, ink = false) {
 const REPLY_ICON = `<svg class="reply-ico" width="20" height="18" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg>`;
 const HEART_ICON = `<svg class="heart-ico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/></svg>`;
 const SHARE_ICON = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>`;
-function postsHtml(t, { limit = Infinity, headingLevel = 'h1', actions = false } = {}) {
+function postsHtml(t, { limit = Infinity, headingLevel = 'h1', actions = false, eagerFirst = false } = {}) {
   const n = t.posts.length;
   return `<ol class="thread">${t.posts.slice(0, limit).map((p, i) => `
 <li class="post" id="post-${i + 1}">
-<div class="rail"><img src="${u('/assets/avatar.webp')}" alt="" width="48" height="48" loading="lazy"><span></span></div>
+<div class="rail"><img src="${u('/assets/avatar-96.webp')}" alt="" width="48" height="48" loading="lazy" decoding="async"><span></span></div>
 <div class="body">
 <div class="who"><strong>${esc(A.shortName || A.name)}</strong><a href="${esc(A.x || '#')}" rel="noopener">${esc(A.handle)}</a><span>· <a href="#post-${i + 1}" aria-label="Post ${i + 1} of ${n}">${i + 1}/${n}</a></span></div>
 ${plain(p.text) ? `<div class="text">${textToHtml(p.text)}</div>` : ''}
-${figure(p.image, { eager: i === 0 && headingLevel === 'h1' })}
+${figure(p.image, { eager: i === 0 && (headingLevel === 'h1' || eagerFirst) })}
 ${actions ? `<div class="acts" data-key="${esc(t.slug)}#p${i + 1}" data-post="${i + 1}" role="group" aria-label="Actions for post ${i + 1}">
 <button class="act act-reply" type="button" data-act="reply" aria-label="Reply to post ${i + 1}">${REPLY_ICON}<span data-rc></span></button>
 <button class="act act-like" type="button" data-act="like" aria-pressed="false" aria-label="Like post ${i + 1}">${HEART_ICON}<span data-lc></span></button>
@@ -210,7 +213,7 @@ function entryHtml(t, i) {
 <div class="entry-side">${stamp(t, i % 2 === 1)}<p class="kicker">${t.posts.length} posts · ${Math.max(1, Math.round(t.words / 200))} min read</p></div>
 <div class="entry-main">
 <h2><a href="${u(t.url)}">${esc(t.title)}</a></h2>
-${showThread ? postsHtml(t, { limit: 3, headingLevel: 'h2' }) : `<p class="summary">${esc(t.summaryText)}</p>${photos.length ? `<div class="strip">${photos.map((p) => figure(p.image)).join('')}</div>` : ''}`}
+${showThread ? postsHtml(t, { limit: 3, headingLevel: 'h2', eagerFirst: true }) : `<p class="summary">${esc(t.summaryText)}</p>${photos.length ? `<div class="strip">${photos.map((p) => figure(p.image)).join('')}</div>` : ''}`}
 <a class="more" href="${u(t.url)}">${showThread && t.posts.length > 3 ? `Continue the thread · ${t.posts.length - 3} more` : 'Read the thread'}<span class="skip"> — ${esc(t.title)}</span></a>
 </div>
 </article>`;
@@ -246,7 +249,7 @@ for (const t of threads) {
   const idx = threads.indexOf(t);
   const related = [...threads.filter((x) => x !== t && x.placeSlug === t.placeSlug), ...threads.filter((x) => x !== t && x.placeSlug !== t.placeSlug)].slice(0, 3);
   const titleTag = [`${t.title} · ${t.place} | ${cfg.siteName}`, `${t.title} | ${cfg.siteName}`].find((x) => x.length <= 68) || t.title;
-  const images = t.posts.filter((p) => p.image).map((p) => imgAbs(p.image.src));
+  const images = t.posts.filter((p) => p.image).map((p) => ({ '@type': 'ImageObject', url: imgAbs(p.image.src), ...(p.image.width ? { width: p.image.width, height: p.image.height } : {}), ...(p.image.alt ? { caption: p.image.alt } : {}) }));
   const ogImage = t.ogImage ? imgAbs(t.ogImage) : (t.cover ? imgAbs(t.cover.src) : null);
   const placeLd = { '@type': 'Place', name: t.place, ...(t.country || t.region ? { address: { '@type': 'PostalAddress', ...(t.region ? { addressRegion: t.region } : {}), ...(t.country ? { addressCountry: t.country } : {}) } } : {}) };
   const shareText = encodeURIComponent(`${t.title} 🧵`);
@@ -269,7 +272,7 @@ for (const t of threads) {
 <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${u('/')}">Threads</a></li><li><a href="${u(`/places/${t.placeSlug}/`)}">${esc(t.place)}</a></li><li aria-current="page">${esc(t.title)}</li></ol></nav>
 <article>
 <header class="t-head">${stamp(t)}<div class="t-head-main"><p class="kicker">Thread · ${t.posts.length} posts</p><h1>${esc(t.title)}</h1>
-<div class="byline"><img src="${u('/assets/avatar.webp')}" alt="" width="28" height="28"><a href="${u('/about/')}" rel="author">${esc(A.name)}</a><time datetime="${t.date}">${fmtDate(t.date)}</time>${t.updated !== t.date ? `<span>Updated <time datetime="${t.updated}">${fmtDate(t.updated)}</time></span>` : ''}<span>${Math.max(1, Math.round(t.words / 200))} min read</span></div></div></header>
+<div class="byline"><img src="${u('/assets/avatar-96.webp')}" alt="" width="28" height="28"><a href="${u('/about/')}" rel="author">${esc(A.name)}</a><time datetime="${t.date}">${fmtDate(t.date)}</time>${t.updated !== t.date ? `<span>Updated <time datetime="${t.updated}">${fmtDate(t.updated)}</time></span>` : ''}<span>${Math.max(1, Math.round(t.words / 200))} min read</span></div></div></header>
 ${postsHtml(t, { actions: true })}
 ${t.tags.length ? `<ul class="tags" aria-label="Topics">${t.tags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
 <div class="share"><span>Share this thread</span>
@@ -457,6 +460,24 @@ ${urls.map((x) => `<url><loc>${esc(x.loc)}</loc><lastmod>${x.lastmod}</lastmod><
 `);
 if (BASE === '') write('CNAME', HOST + '\n');
 if (cfg.indexNowKey) write(`${cfg.indexNowKey}.txt`, cfg.indexNowKey);
+// llms.txt: a plain summary for AI search tools (ChatGPT, Perplexity, Gemini, Claude)
+write('llms.txt', `# ${cfg.siteName}
+
+> ${cfg.description} ${NOTICE}.
+
+Written by ${A.name} (${A.handle}). Each page is a travel thread: short numbered posts with real photos from one trip.
+
+## Threads
+${threads.map((t) => `- [${t.title}](${abs(t.url)}): ${t.place}${t.country ? ', ' + t.country : ''}. ${t.summaryText}`).join('\n') || '- Coming soon'}
+
+## Places
+${[...places.values()].map((p) => `- [${p.name}](${abs(`/places/${p.slug}/`)})`).join('\n') || '- Coming soon'}
+
+## About
+- [About ${A.name}](${abs('/about/')})
+- [Contact](${abs('/contact/')})
+- [Privacy](${abs('/privacy/')})
+`);
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${abs('/sitemap.xml')}\n`);
 write('feed.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">

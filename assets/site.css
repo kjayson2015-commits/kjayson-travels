@@ -222,3 +222,8 @@ img{max-width:100%;height:auto;display:block}
 .x-link{border:0;background:none;padding:6px 2px;color:var(--reply);font:inherit;font-weight:600;cursor:pointer}
 .x-av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .x-cbar .muted{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
+/* accessibility: stronger blues/pinks on the light theme, underlined in-text links */
+:root{--reply:#0B5FB0;--like:#C2185B}
+:root[data-theme=dark]{--reply:#4AA8F0;--like:#F91880}
+.x-replying a,.x-rto a,.post .who a[href^="https://x.com"]{text-decoration:underline;text-underline-offset:2px}
+.post .who a{color:var(--muted)}

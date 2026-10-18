@@ -113,6 +113,17 @@
 
   var me = form.querySelector('[data-me]'), asEl = form.querySelector('[data-asname]'), authSlot = document.createElement('span');
   authSlot.className = 'x-auth'; asEl.parentNode.appendChild(authSlot);
+  // Load Google's sign-in script only once a visitor engages (scroll, tap, key, or reaching the replies),
+  // so it never slows the first paint or the page speed score.
+  var engagedQ = [], engaged = false;
+  function fireEngaged() {
+    if (engaged) return; engaged = true;
+    ['scroll', 'pointerdown', 'keydown', 'touchstart', 'focusin'].forEach(function (ev) { window.removeEventListener(ev, fireEngaged, { passive: true }); });
+    var q = engagedQ; engagedQ = []; q.forEach(function (fn) { try { fn(); } catch (e) {} });
+  }
+  function whenEngaged(fn) { if (engaged) fn(); else engagedQ.push(fn); }
+  ['scroll', 'pointerdown', 'keydown', 'touchstart', 'focusin'].forEach(function (ev) { window.addEventListener(ev, fireEngaged, { passive: true, once: true }); });
+  if ('IntersectionObserver' in window) { var io = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); fireEngaged(); } }, { rootMargin: '200px' }); io.observe(box); }
   function paintMe() {
     me.innerHTML = ''; me.style.background = '';
     if (session) {
@@ -124,7 +135,7 @@
     } else {
       me.textContent = initial(asName); me.style.background = hue(asName); asEl.textContent = asName;
       authSlot.innerHTML = ''; window.KJT_OWNER = false;
-      if (C.gid) { var gb = document.createElement('span'); gb.className = 'x-gbtn'; authSlot.appendChild(gb); renderGoogleButton(gb); }
+      if (C.gid) { var gb = document.createElement('span'); gb.className = 'x-gbtn'; authSlot.appendChild(gb); whenEngaged(function () { renderGoogleButton(gb); }); }
     }
   }
   var rawNonce = null, hashedNonce = null, gisReady = null;
@@ -163,7 +174,7 @@
     paintMe(); if (window.KJT_onAuth) window.KJT_onAuth();
   });
   paintMe();
-  if (!session && C.gid) loadGis().then(function () { google.accounts.id.prompt(); }).catch(function () {});
+  if (!session && C.gid) whenEngaged(function () { loadGis().then(function () { if (!session) google.accounts.id.prompt(); }).catch(function () {}); });
 
   // likes
   function paintLike(btn) {
