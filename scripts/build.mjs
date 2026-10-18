@@ -263,7 +263,7 @@ for (const t of threads) {
 <div class="byline"><img src="${u('/assets/avatar.webp')}" alt="" width="28" height="28"><a href="${u('/about/')}" rel="author">${esc(A.name)}</a><time datetime="${t.date}">${fmtDate(t.date)}</time>${t.updated !== t.date ? `<span>Updated <time datetime="${t.updated}">${fmtDate(t.updated)}</time></span>` : ''}<span>${Math.max(1, Math.round(t.words / 200))} min read</span></div></div></header>
 ${postsHtml(t)}
 ${t.tags.length ? `<ul class="tags" aria-label="Topics">${t.tags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-<div class="react"><button class="btn like-btn" id="likeBtn" type="button" data-slug="${esc(t.slug)}" aria-pressed="false" aria-label="Like this thread"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/></svg><span data-count>0</span><span>Like</span></button><a class="btn" href="#comments">Comment</a></div>
+<div class="react"><button class="btn like-btn" id="likeBtn" type="button" data-slug="${esc(t.slug)}" aria-pressed="false" aria-label="Like this thread"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 0 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z"/></svg><span data-count>0</span><span>Like</span></button><a class="btn" href="#comments"><svg class="reply-ico" width="22" height="20" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg><span>Reply</span></a></div>
 <div class="share"><span>Share this thread</span>
 <a class="btn solid" href="https://x.com/intent/post?text=${shareText}&url=${shareUrl}&via=${encodeURIComponent((A.handle || '').replace('@', ''))}" rel="noopener" target="_blank">Post on X</a>
 <a class="btn" href="https://wa.me/?text=${shareText}%20${shareUrl}" rel="noopener" target="_blank">WhatsApp</a>
@@ -271,12 +271,11 @@ ${t.tags.length ? `<ul class="tags" aria-label="Topics">${t.tags.map((x) => `<li
 <button class="btn" type="button" data-copy="${abs(t.url)}">Copy link</button>
 </div>
 </article>
-<section class="comments" id="comments" data-slug="${esc(t.slug)}" aria-labelledby="c-title"><h2 id="c-title">Comments <span class="muted" data-ccount></span></h2>
-<ol class="c-list" aria-live="polite"><li class="muted">Loading comments…</li></ol>
-<form class="c-form" novalidate><div><label for="c-name">Your name</label><input id="c-name" name="name" type="text" maxlength="60" autocomplete="name" required></div>
-<div><label for="c-body">Comment</label><textarea id="c-body" name="body" rows="4" maxlength="1000" required></textarea></div>
+<section class="comments" id="comments" data-slug="${esc(t.slug)}" aria-labelledby="c-title"><h2 id="c-title"><svg class="reply-ico" width="22" height="20" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg> Replies <span class="muted" data-ccount></span></h2>
+<ol class="c-list" aria-live="polite"><li class="muted">Loading replies…</li></ol>
+<form class="c-form" novalidate><div><label for="c-body">Write a reply</label><textarea id="c-body" name="body" rows="3" maxlength="1000" placeholder="Say something about this thread…" required></textarea></div>
 <div class="hp" aria-hidden="true"><label for="c-web">Website</label><input id="c-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-<div class="row" style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><button class="btn solid" type="submit">Post comment</button><span class="c-msg" role="status"></span></div></form></section>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><button class="btn solid" type="submit"><svg class="reply-ico" width="22" height="20" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg><span>Post reply</span></button><span class="muted" style="font-size:14px">Posting as <strong data-asname>a visitor</strong> · no sign-up</span><span class="c-msg" role="status"></span></div></form></section>
 ${related.length ? `<h2 class="section-title">More threads</h2><div class="cards">${related.map(card).join('')}</div>` : ''}
 ${idx < threads.length - 1 ? `<p><a class="more" href="${u(threads[idx + 1].url)}" rel="prev">← Older: ${esc(threads[idx + 1].title)}</a></p>` : ''}
 ${idx > 0 ? `<p><a class="more" href="${u(threads[idx - 1].url)}" rel="next">Newer: ${esc(threads[idx - 1].title)} →</a></p>` : ''}
@@ -357,14 +356,14 @@ write('dashboard/index.html', page({
 <div class="tile"><b id="d-today">–</b><span>Views today</span></div>
 <div class="tile"><b id="d-all">–</b><span>All-time views</span></div>
 <div class="tile"><b id="d-likes">–</b><span>Likes</span></div>
-<div class="tile"><b id="d-comments">–</b><span>Comments</span></div>
+<div class="tile"><b id="d-comments">–</b><span>Replies</span></div>
 </div>
 <section class="panel"><h2>Views per day</h2><div class="bars" id="d-bars" role="img" aria-label="Views per day"></div><div class="bar-axis"><span id="d-first"></span><span id="d-last"></span></div></section>
 <div class="dash-grid">
 <section class="panel"><h2>Top pages</h2><ul class="rows" id="d-pages"></ul></section>
 <section class="panel"><h2>Where visitors came from</h2><ul class="rows" id="d-refs"></ul></section>
 <section class="panel"><h2>Devices</h2><ul class="rows" id="d-devices"></ul></section>
-<section class="panel"><h2>Latest comments</h2><ul class="rows" id="d-comments-list"></ul><p class="muted" style="font-size:14px;margin:10px 0 0">To hide a comment, open the <a href="https://supabase.com/dashboard/project/${esc((SB.url || '').replace(/^https:\/\//, '').split('.')[0])}/editor" rel="noopener" target="_blank">travel_comments table in Supabase</a> and tick <em>hidden</em>.</p></section>
+<section class="panel"><h2>Latest replies</h2><ul class="rows" id="d-comments-list"></ul><p class="muted" style="font-size:14px;margin:10px 0 0">To hide a comment, open the <a href="https://supabase.com/dashboard/project/${esc((SB.url || '').replace(/^https:\/\//, '').split('.')[0])}/editor" rel="noopener" target="_blank">travel_comments table in Supabase</a> and tick <em>hidden</em>.</p></section>
 </div>
 <p class="muted" style="font-size:14px">Your own visits aren't counted on this device: <button class="btn" type="button" id="d-notrack" style="min-height:36px;padding:4px 12px;font-size:14px"></button></p>
 </div>`,

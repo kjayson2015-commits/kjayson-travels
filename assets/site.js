@@ -69,6 +69,7 @@
   }
 
   // ---------- comments ----------
+  var REPLY_ICON = '<svg class="reply-ico" width="18" height="16" viewBox="0 0 44 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 3C11 3 3 9 3 17c0 4.5 2.6 8.5 6.8 11L8 36l9.2-4.6c1.5.3 3.1.4 4.8.4 11 0 19-6 19-14.4S33 3 22 3z"/><path d="M15 12h16M15 17h16M15 22h16"/><path d="M8 33c1-7 5-12 12-13.5"/><path d="M17 15.5l5 4-5.4 3.6"/></svg>';
   var box = document.getElementById('comments');
   if (box) {
     var cslug = box.getAttribute('data-slug');
@@ -77,27 +78,44 @@
     var fmt = function (iso) { try { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; } };
     var add = function (c) {
       var li = document.createElement('li'); li.className = 'c-item';
-      var who = document.createElement('span'); who.className = 'c-who'; who.textContent = c.name;
+      var who = document.createElement('span'); who.className = 'c-who'; who.innerHTML = REPLY_ICON; who.appendChild(document.createTextNode(' ' + c.name));
       var t = document.createElement('time'); t.dateTime = c.created_at; t.textContent = fmt(c.created_at);
       var p = document.createElement('p'); p.textContent = c.body;
       li.appendChild(who); li.appendChild(t); li.appendChild(p); list.appendChild(li);
     };
     var setCount = function () { var n = list.children.length; countLabel.textContent = n ? '(' + n + ')' : ''; };
     api('travel_comments?select=name,body,created_at&thread_slug=eq.' + encodeURIComponent(cslug) + '&order=created_at.asc&limit=300')
-      .then(function (rows) { list.innerHTML = ''; (rows || []).forEach(add); if (!rows || !rows.length) list.innerHTML = '<li class="muted">No comments yet. Be the first.</li>'; setCount(); })
-      .catch(function () { list.innerHTML = '<li class="muted">Comments could not load right now.</li>'; });
-    var nameIn = form.querySelector('[name=name]'); nameIn.value = store.get('kjt-name') || '';
+      .then(function (rows) { list.innerHTML = ''; (rows || []).forEach(add); if (!rows || !rows.length) list.innerHTML = '<li class="muted">No replies yet. Be the first.</li>'; setCount(); })
+      .catch(function () { list.innerHTML = '<li class="muted">Replies could not load right now.</li>'; });
+    var asName = (function () {
+      var ua = navigator.userAgent || '', b = 'Browser', os = '';
+      if (/SamsungBrowser/i.test(ua)) b = 'Samsung Internet';
+      else if (/OPR\/|Opera/i.test(ua)) b = 'Opera';
+      else if (/Edg\//i.test(ua)) b = 'Edge';
+      else if (/Firefox|FxiOS/i.test(ua)) b = 'Firefox';
+      else if (/CriOS|Chrome/i.test(ua)) b = 'Chrome';
+      else if (/Safari/i.test(ua)) b = 'Safari';
+      if (/iPhone/i.test(ua)) os = 'iPhone';
+      else if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) os = 'iPad';
+      else if (/Android/i.test(ua)) os = 'Android';
+      else if (/Windows/i.test(ua)) os = 'Windows';
+      else if (/Mac OS X|Macintosh/i.test(ua)) os = 'Mac';
+      else if (/CrOS/i.test(ua)) os = 'Chromebook';
+      else if (/Linux/i.test(ua)) os = 'Linux';
+      return os ? b + ' on ' + os : b + ' visitor';
+    })();
+    var asEl = form.querySelector('[data-asname]'); if (asEl) asEl.textContent = asName;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (form.querySelector('[name=website]').value) return; // bots
-      var name = nameIn.value.trim(), body = form.querySelector('[name=body]').value.trim();
-      if (!name || !body) { msg.className = 'c-msg err'; msg.textContent = 'Add your name and a comment.'; return; }
+      var body = form.querySelector('[name=body]').value.trim();
+      if (!body) { msg.className = 'c-msg err'; msg.textContent = 'Write something first.'; return; }
       var btn = form.querySelector('button'); btn.disabled = true; msg.className = 'c-msg'; msg.textContent = 'Posting…';
-      api('travel_comments', { method: 'POST', headers: { Prefer: 'return=representation' }, body: { thread_slug: cslug, name: name.slice(0, 60), body: body.slice(0, 1000) } })
+      api('travel_comments', { method: 'POST', headers: { Prefer: 'return=representation' }, body: { thread_slug: cslug, name: asName.slice(0, 60), body: body.slice(0, 1000) } })
         .then(function (rows) {
           if (list.querySelector('.muted')) list.innerHTML = '';
-          (rows || []).forEach(add); setCount(); store.set('kjt-name', name);
-          form.querySelector('[name=body]').value = ''; msg.className = 'c-msg ok'; msg.textContent = 'Thanks! Your comment is up.';
+          (rows || []).forEach(add); setCount();
+          form.querySelector('[name=body]').value = ''; msg.className = 'c-msg ok'; msg.textContent = 'Reply posted!';
         })
         .catch(function (err) { msg.className = 'c-msg err'; msg.textContent = /Too many/.test(err.message) ? err.message : 'Could not post. Please try again.'; })
         .then(function () { btn.disabled = false; });

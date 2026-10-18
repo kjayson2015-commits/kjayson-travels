@@ -138,3 +138,6 @@ img{max-width:100%;height:auto;display:block}
 .seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
 .seg button{font:inherit;font-size:14px;font-weight:600;background:transparent;color:var(--ink);border:0;padding:10px 16px;min-height:44px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.reply-ico{display:inline-block;vertical-align:-3px;flex-shrink:0}
+.comments h2 .reply-ico{width:30px;height:27px;vertical-align:-4px;margin-right:4px}
+.c-item .c-who{display:inline-flex;align-items:center;gap:6px}
