@@ -1,0 +1,52 @@
+{
+  "slug": "sunset-lake-victoria-kisumu",
+  "title": "Chasing the sunset at Lake Victoria, Kisumu",
+  "summary": "Where to watch the sunset on Lake Victoria in Kisumu, when to arrive, what it costs, and tips for getting the best photos.",
+  "place": "Kisumu",
+  "region": "Lake Victoria",
+  "country": "Kenya",
+  "date": "2025-11-11",
+  "updated": "2025-11-11",
+  "tags": [
+    "sunset",
+    "lake",
+    "photography",
+    "Kisumu"
+  ],
+  "draft": false,
+  "posts": [
+    {
+      "text": "I came for the sunset and stayed until the sky ran out of colours. Lake Victoria in Kisumu does sunsets better than anywhere I’ve been. Here’s how to catch it right",
+      "image": {
+        "src": "images/sunset-lake-victoria-kisumu/mve9pcub-1-1600.webp",
+        "src800": "images/sunset-lake-victoria-kisumu/mve9pcub-1-800.webp",
+        "width": 507,
+        "height": 900,
+        "alt": "Orange sunset over Lake Victoria in Kisumu, with the sun setting on the water"
+      }
+    },
+    {
+      "text": "Timing matters. Get there at least 45 minutes before sunset. The best colours come in the 20 minutes after the sun touches the water, which is when most people pack up and leave.",
+      "image": {
+        "src": "images/sunset-lake-victoria-kisumu/mve9pcub-2-1600.webp",
+        "src800": "images/sunset-lake-victoria-kisumu/mve9pcub-2-800.webp",
+        "width": 507,
+        "height": 900,
+        "alt": "Sun sets Smoothly within 45 minutes"
+      }
+    },
+    {
+      "text": "Where to stand: Dunga Beach and Hippo Point both face west over open water. Pick the spot where nothing blocks the horizon. Bring something to sit on, because the ground near the shore gets muddy."
+    },
+    {
+      "text": "What it cost me: [ENTRY FEE] to get in and [TRANSPORT COST] for transport from town. Snacks by the water are cheap, so grab a soda and some roasted maize while you wait."
+    },
+    {
+      "text": "Photo tips from today:\n\nTap the brightest part of the sky to lock exposure, so the colours don’t wash out\nPut a boat or a person in the frame for scale\nKeep shooting after sunset, when the sky turns pink and purple"
+    },
+    {
+      "text": "That’s the whole evening. Where should I chase the next sunset? Drop a place and I’ll make a thread about it."
+    }
+  ],
+  "ogImage": "images/sunset-lake-victoria-kisumu/mve9pcub-share.jpg"
+}
