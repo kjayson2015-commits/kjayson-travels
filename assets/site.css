@@ -185,3 +185,35 @@ img{max-width:100%;height:auto;display:block}
 .x-empty{padding:18px 0}
 .post.flash .body{animation:fade 1.4s ease;border-radius:12px}
 .x-reply .acts{max-width:200px;margin-top:4px}
+/* threads, menus, edit/delete */
+.x-reply{border-bottom:0;position:relative}
+.x-list > .x-reply{border-bottom:1px solid var(--line)}
+.x-rbody{min-width:0}
+.x-kids{list-style:none;margin:0;padding:0}
+.x-kids > .x-reply{padding-top:10px}
+.x-kids > .x-reply:before{content:"";position:absolute;left:-34px;top:0;bottom:0;width:2px;background:var(--line)}
+.x-kids .x-kids .x-kids{margin-left:-56px}
+.x-av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.x-av.gone{background:var(--photo)!important}
+.x-verified{color:var(--reply);display:inline-flex;align-self:center}
+.x-edited{color:var(--muted)}
+.x-more-wrap{margin-left:auto;position:relative}
+.x-more{width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.x-more:hover,.x-more[aria-expanded=true]{color:var(--reply);background:rgba(29,155,240,.12)}
+.x-menu{position:absolute;right:0;top:38px;z-index:5;min-width:170px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px var(--shadow);padding:6px;display:flex;flex-direction:column}
+.x-menu[hidden]{display:none}
+.x-menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+.x-menu button:hover,.x-menu button:focus-visible{background:var(--bg)}
+.x-menu .danger,.x-pill.danger{color:#F4212E}
+.x-pill.danger{background:#F4212E;color:#fff}
+.x-cancel{min-height:40px;padding:0 16px;border:1.5px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.x-cancel[hidden]{display:none}
+.x-editbox{margin:6px 0}
+.x-editbox textarea{width:100%;font:inherit;font-size:17px;line-height:1.5;padding:10px 12px;border:1.5px solid var(--reply);border-radius:12px;background:var(--field);color:var(--ink);resize:vertical}
+.x-editbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
+.x-editbar .c-msg{margin-right:auto}
+.x-confirm{display:flex;flex-direction:column;gap:4px;margin:8px 0;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+.x-compose.nested{margin:6px 0 4px;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.x-compose.nested .x-av{width:36px;height:36px;font-size:14px}
+.x-compose.nested{grid-template-columns:36px minmax(0,1fr)}
+.is-gone .x-rhead{padding:6px 0 10px}

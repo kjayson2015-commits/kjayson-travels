@@ -118,7 +118,7 @@
         .then(function (s) { likeState[key] = s; paintLike(btn); })
         .catch(function () { likeState[key] = st; paintLike(btn); });
     } else if (act === 'reply') {
-      setReplyTo(+wrap.getAttribute('data-post') || null);
+      replyToPost(+wrap.getAttribute('data-post') || null);
       form.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(function () { ta.focus({ preventScroll: true }); }, 300);
     } else if (act === 'share') {
       var url = btn.getAttribute('data-url') || location.href.split('#')[0];
@@ -130,78 +130,216 @@
     }
   });
 
-  // composer
-  function setReplyTo(n) { replyTo = n; toEl.textContent = n ? ' · post ' + n + '/' + nPosts : ''; }
+  // ---------- reply tree, edit, delete ----------
+  var TOKENS_KEY = 'kjt-tokens';
+  var tokens = {}; try { tokens = JSON.parse(store.get(TOKENS_KEY) || '{}') || {}; } catch (e) {}
+  var saveToken = function (id, t) { tokens[id] = t; store.set(TOKENS_KEY, JSON.stringify(tokens)); };
+  var byId = {};          // id -> reply data
+  var homeSlot = document.createElement('div'); homeSlot.className = 'x-compose-home';
+  form.parentNode.insertBefore(homeSlot, form); homeSlot.appendChild(form);
+  var parentId = null;
+  var cancelBtn = document.createElement('button'); cancelBtn.type = 'button'; cancelBtn.className = 'x-cancel'; cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', function () { resetComposer(); });
+  form.querySelector('.x-right').insertBefore(cancelBtn, form.querySelector('.x-right').firstChild);
+
+  function setReplyTo(n) { replyTo = n; }
+  function resetComposer() {
+    parentId = null; setReplyTo(null); homeSlot.appendChild(form); form.classList.remove('nested');
+    toEl.textContent = ''; form.querySelector('.x-replying').firstChild.textContent = 'Replying to ';
+    form.querySelector('.x-replying a').hidden = false; cancelBtn.hidden = true;
+  }
+  function replyToPost(n) {
+    resetComposer(); setReplyTo(n || null); toEl.textContent = n ? ' · post ' + n + '/' + nPosts : '';
+  }
+  function replyToReply(id) {
+    var r = byId[id]; if (!r) return;
+    parentId = id; setReplyTo(r.post_index || null);
+    var li = document.getElementById('reply-' + id); var slot = li.querySelector(':scope > .x-rbody > .x-slot');
+    slot.appendChild(form); form.classList.add('nested'); cancelBtn.hidden = false;
+    form.querySelector('.x-replying').firstChild.textContent = 'Replying to ';
+    form.querySelector('.x-replying a').hidden = true; toEl.textContent = r.deleted ? 'a deleted reply' : r.name;
+  }
+  cancelBtn.hidden = true;
+
   ta.addEventListener('input', function () {
     var L = ta.value.length; form.querySelector('[data-chars]').textContent = L + '/1000';
     pill.disabled = !ta.value.trim();
     ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 320) + 'px';
   });
 
-  // replies list
+  function canManage(r) { return !r.deleted && (!!tokens[r.id] || !!r.mine || !!window.KJT_OWNER); }
+  function countTree(id) { var n = 0; (byId[id].kids || []).forEach(function (k) { n += 1 + countTree(k); }); return n; }
   function paintReplyCounts() {
+    var perPost = {};
+    Object.keys(byId).forEach(function (id) { var r = byId[id]; if (!r.deleted) { var n = r.post_index || 1; perPost[n] = (perPost[n] || 0) + 1; } });
     document.querySelectorAll('.post .acts').forEach(function (a) {
-      var n = +a.getAttribute('data-post'), el = a.querySelector('[data-rc]');
-      if (el) el.textContent = fmtN(replyCounts[n] || 0);
+      var n = +a.getAttribute('data-post'), el = a.querySelector('[data-rc]'); if (el) el.textContent = fmtN(perPost[n] || 0);
     });
-    var total = list.querySelectorAll('.x-reply').length;
+    Object.keys(byId).forEach(function (id) {
+      var li = document.getElementById('reply-' + id); if (!li) return;
+      var el = li.querySelector(':scope > .x-rbody > .acts [data-rc]'); if (el) el.textContent = fmtN((byId[id].kids || []).length);
+    });
+    var total = Object.keys(byId).filter(function (id) { return !byId[id].deleted; }).length;
     box.querySelector('[data-rtotal]').textContent = total ? '(' + total + ')' : '';
+    if (!list.querySelector('.x-reply')) list.innerHTML = '<li class="muted x-empty">No replies yet. Be the first.</li>';
   }
-  function replyEl(c, fresh) {
-    var li = document.createElement('li'); li.className = 'x-reply' + (fresh ? ' fresh' : '');
-    var av = document.createElement('div'); av.className = 'x-av'; av.setAttribute('aria-hidden', 'true'); av.textContent = initial(c.name); av.style.background = hue(c.name);
-    var body = document.createElement('div');
+
+  function avatarEl(r) {
+    var av = document.createElement('div'); av.className = 'x-av'; av.setAttribute('aria-hidden', 'true');
+    if (r.deleted) { av.className += ' gone'; av.textContent = ''; return av; }
+    if (r.avatar_url) { var img = document.createElement('img'); img.src = r.avatar_url; img.alt = ''; img.referrerPolicy = 'no-referrer'; img.loading = 'lazy'; av.appendChild(img); av.style.background = 'transparent'; }
+    else { av.textContent = initial(r.name); av.style.background = hue(r.name); }
+    return av;
+  }
+  function replyEl(r, fresh) {
+    var li = document.createElement('li'); li.className = 'x-reply' + (fresh ? ' fresh' : '') + (r.deleted ? ' is-gone' : ''); li.id = 'reply-' + r.id;
+    li.appendChild(avatarEl(r));
+    var body = document.createElement('div'); body.className = 'x-rbody';
     var head = document.createElement('div'); head.className = 'x-rhead';
-    var nm = document.createElement('strong'); nm.textContent = c.name;
-    var tm = document.createElement('span'); var t = document.createElement('time'); t.dateTime = c.created_at; t.textContent = ago(c.created_at); t.title = new Date(c.created_at).toLocaleString();
-    tm.appendChild(document.createTextNode('· ')); tm.appendChild(t);
-    head.appendChild(nm); head.appendChild(tm); body.appendChild(head);
-    if (c.post_index) {
-      var to = document.createElement('p'); to.className = 'x-rto';
-      to.innerHTML = 'Replying to <a href="#post-' + (+c.post_index) + '">post ' + (+c.post_index) + '/' + nPosts + '</a>';
-      body.appendChild(to);
+    if (r.deleted) {
+      var gone = document.createElement('em'); gone.className = 'muted'; gone.textContent = 'This reply was deleted'; head.appendChild(gone);
+      body.appendChild(head);
+    } else {
+      var nm = document.createElement('strong'); nm.textContent = r.name; head.appendChild(nm);
+      if (r.verified) { var vb = document.createElement('span'); vb.className = 'x-verified'; vb.title = 'Signed in with Google'; vb.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.4 2.1 3.1-.4 1 3 2.8 1.5-.9 3 1.4 2.8-2.5 1.9-.2 3.2-3.1.4L14.4 22 12 20.3 9.6 22l-1.6-2.5-3.1-.4-.2-3.2L2.2 14l1.4-2.8-.9-3 2.8-1.5 1-3 3.1.4z"/><path d="M8 12.3l2.6 2.6L16.2 9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr">Signed in with Google</span>'; head.appendChild(vb); }
+      var tm = document.createElement('span'); var t = document.createElement('time'); t.dateTime = r.created_at; t.textContent = ago(r.created_at); t.title = new Date(r.created_at).toLocaleString();
+      tm.appendChild(document.createTextNode('· ')); tm.appendChild(t);
+      if (r.edited_at) { var ed = document.createElement('span'); ed.className = 'x-edited'; ed.textContent = ' · Edited'; tm.appendChild(ed); }
+      head.appendChild(tm);
+      if (canManage(r)) {
+        var mb = document.createElement('button'); mb.type = 'button'; mb.className = 'x-more'; mb.setAttribute('aria-label', 'Reply options'); mb.setAttribute('aria-haspopup', 'menu'); mb.setAttribute('aria-expanded', 'false');
+        mb.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+        var menu = document.createElement('div'); menu.className = 'x-menu'; menu.setAttribute('role', 'menu'); menu.hidden = true;
+        var own = !!tokens[r.id] || !!r.mine;
+        menu.innerHTML = (own ? '<button type="button" role="menuitem" data-m="edit"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Edit</button>' : '') +
+          '<button type="button" role="menuitem" data-m="delete" class="danger"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Delete</button>';
+        var wrapM = document.createElement('span'); wrapM.className = 'x-more-wrap'; wrapM.appendChild(mb); wrapM.appendChild(menu);
+        head.appendChild(wrapM);
+      }
+      body.appendChild(head);
+      var parent = r.parent_id && byId[r.parent_id];
+      if (!r.parent_id && r.post_index) {
+        var to = document.createElement('p'); to.className = 'x-rto';
+        to.innerHTML = 'Replying to <a href="#post-' + (+r.post_index) + '">post ' + (+r.post_index) + '/' + nPosts + '</a>'; body.appendChild(to);
+      } else if (parent && !parent.deleted) {
+        var to2 = document.createElement('p'); to2.className = 'x-rto'; to2.appendChild(document.createTextNode('Replying to '));
+        var a = document.createElement('a'); a.href = '#reply-' + parent.id; a.textContent = parent.name; to2.appendChild(a); body.appendChild(to2);
+      }
+      var p = document.createElement('p'); p.className = 'x-rtext'; p.textContent = r.body; body.appendChild(p);
+      var acts = document.createElement('div'); acts.className = 'acts'; acts.setAttribute('data-key', slug + '#r' + r.id); acts.setAttribute('data-reply', r.id);
+      acts.innerHTML = '<button class="act act-reply" type="button" data-act="replyto" aria-label="Reply to ' + r.name.replace(/"/g, '') + '">' + REPLY_ICON + '<span data-rc></span></button>' +
+        '<button class="act act-like" type="button" data-act="like" aria-pressed="false" aria-label="Like this reply">' + HEART_ICON + '<span data-lc></span></button>';
+      body.appendChild(acts);
     }
-    var p = document.createElement('p'); p.className = 'x-rtext'; p.textContent = c.body; body.appendChild(p);
-    var acts = document.createElement('div'); acts.className = 'acts'; acts.setAttribute('data-key', slug + '#r' + c.id); acts.setAttribute('data-post', c.post_index || '');
-    acts.innerHTML = '<button class="act act-reply" type="button" data-act="reply" aria-label="Reply">' + REPLY_ICON + '<span data-rc></span></button>' +
-      '<button class="act act-like" type="button" data-act="like" aria-pressed="false" aria-label="Like this reply">' + HEART_ICON + '<span data-lc></span></button>';
-    body.appendChild(acts);
-    li.appendChild(av); li.appendChild(body);
+    var slot = document.createElement('div'); slot.className = 'x-slot'; body.appendChild(slot);
+    var kids = document.createElement('ol'); kids.className = 'x-kids'; body.appendChild(kids);
+    li.appendChild(body);
     return li;
   }
-  api('travel_comments?select=id,name,body,created_at,post_index&thread_slug=eq.' + encodeURIComponent(slug) + '&order=created_at.desc&limit=300')
+  function render() {
+    list.innerHTML = '';
+    var roots = [];
+    Object.keys(byId).forEach(function (id) { byId[id].kids = []; });
+    Object.keys(byId).map(Number).sort(function (a, b) { return a - b; }).forEach(function (id) {
+      var r = byId[id]; if (r.parent_id && byId[r.parent_id]) byId[r.parent_id].kids.push(id); else roots.push(id);
+    });
+    var visible = function (id) { var r = byId[id]; return !r.deleted || r.kids.some(visible); };
+    var build = function (id, depth) {
+      var li = replyEl(byId[id]);
+      var kidsOl = li.querySelector(':scope > .x-rbody > .x-kids');
+      byId[id].kids.filter(visible).forEach(function (k) {
+        var child = build(k, depth + 1);
+        if (depth >= 3) li.parentNode ? li.parentNode.appendChild(child) : kidsOl.appendChild(child); else kidsOl.appendChild(child);
+      });
+      return li;
+    };
+    roots.filter(visible).reverse().forEach(function (id) { list.appendChild(build(id, 1)); });
+    paintReplyCounts();
+    document.querySelectorAll('.x-reply .act-like').forEach(paintLike);
+  }
+
+  api('rpc/travel_list_replies', { method: 'POST', body: { p_slug: slug } })
     .then(function (rows) {
-      rows = rows || []; list.innerHTML = '';
-      if (!rows.length) list.innerHTML = '<li class="muted x-empty">No replies yet. Be the first.</li>';
-      rows.forEach(function (c) { list.appendChild(replyEl(c)); if (c.post_index) replyCounts[c.post_index] = (replyCounts[c.post_index] || 0) + 1; else replyCounts[1] = (replyCounts[1] || 0) + 1; });
-      paintReplyCounts();
+      (rows || []).forEach(function (r) { byId[r.id] = r; });
+      render();
       var keys = []; for (var i = 1; i <= nPosts; i++) keys.push(slug + '#p' + i);
-      rows.forEach(function (c) { keys.push(slug + '#r' + c.id); });
+      Object.keys(byId).forEach(function (id) { keys.push(slug + '#r' + id); });
       return loadLikes(keys);
     })
+    .then(function () { if (/^#reply-\d+$/.test(location.hash)) { var el = document.querySelector(location.hash); if (el) { el.classList.add('fresh'); el.scrollIntoView({ block: 'center' }); } } })
     .catch(function () { list.innerHTML = '<li class="muted x-empty">Replies could not load right now.</li>'; });
+
+  // reply buttons on replies, menus, edit, delete
+  box.addEventListener('click', function (e) {
+    var t = e.target;
+    var rt = t.closest('[data-act=replyto]');
+    if (rt) { e.stopPropagation(); replyToReply(+rt.closest('[data-reply]').getAttribute('data-reply')); setTimeout(function () { ta.focus(); }, 50); return; }
+    var mb = t.closest('.x-more');
+    if (mb) { var m = mb.nextElementSibling, open = m.hidden; closeMenus(); m.hidden = !open; mb.setAttribute('aria-expanded', open ? 'true' : 'false'); if (open) m.querySelector('button').focus(); return; }
+    var mi = t.closest('[data-m]');
+    if (mi) { var li = mi.closest('.x-reply'), id = +li.id.replace('reply-', ''); closeMenus(); if (mi.getAttribute('data-m') === 'edit') startEdit(id); else askDelete(id); return; }
+    if (!t.closest('.x-menu')) closeMenus();
+  }, true);
+  document.addEventListener('click', function (e) { if (!e.target.closest('.x-more-wrap')) closeMenus(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenus(); });
+  function closeMenus() { box.querySelectorAll('.x-menu').forEach(function (m) { m.hidden = true; }); box.querySelectorAll('.x-more').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); }); }
+
+  function startEdit(id) {
+    var li = document.getElementById('reply-' + id), body = li.querySelector(':scope > .x-rbody'), p = body.querySelector(':scope > .x-rtext');
+    if (!p || body.querySelector(':scope > .x-editbox')) return;
+    var boxE = document.createElement('div'); boxE.className = 'x-editbox';
+    var eta = document.createElement('textarea'); eta.value = byId[id].body; eta.maxLength = 1000; eta.rows = 3; eta.setAttribute('aria-label', 'Edit your reply');
+    var row = document.createElement('div'); row.className = 'x-editbar';
+    var cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'x-cancel'; cancel.textContent = 'Cancel';
+    var save = document.createElement('button'); save.type = 'button'; save.className = 'x-pill'; save.textContent = 'Save';
+    var em = document.createElement('span'); em.className = 'c-msg';
+    row.appendChild(em); row.appendChild(cancel); row.appendChild(save); boxE.appendChild(eta); boxE.appendChild(row);
+    p.hidden = true; p.after(boxE); eta.focus(); eta.setSelectionRange(eta.value.length, eta.value.length);
+    cancel.addEventListener('click', function () { boxE.remove(); p.hidden = false; });
+    save.addEventListener('click', function () {
+      var v = eta.value.trim(); if (!v) { em.className = 'c-msg err'; em.textContent = 'Write something first.'; return; }
+      save.disabled = true; em.className = 'c-msg'; em.textContent = 'Saving…';
+      api('rpc/travel_edit_reply', { method: 'POST', body: { p_id: id, p_token: tokens[id] || null, p_body: v } }).then(function (res) {
+        byId[id].body = res.body; byId[id].edited_at = res.edited_at; p.textContent = res.body; boxE.remove(); p.hidden = false;
+        var head = body.querySelector(':scope > .x-rhead > span:not(.x-more-wrap):not(.x-verified)');
+        if (head && !head.querySelector('.x-edited')) { var ed = document.createElement('span'); ed.className = 'x-edited'; ed.textContent = ' · Edited'; head.appendChild(ed); }
+      }).catch(function (err) { save.disabled = false; em.className = 'c-msg err'; em.textContent = err.message || 'Could not save.'; });
+    });
+  }
+  function askDelete(id) {
+    var li = document.getElementById('reply-' + id), body = li.querySelector(':scope > .x-rbody');
+    if (body.querySelector(':scope > .x-confirm')) return;
+    var c = document.createElement('div'); c.className = 'x-confirm'; c.setAttribute('role', 'alertdialog'); c.setAttribute('aria-label', 'Delete reply?');
+    c.innerHTML = '<strong>Delete reply?</strong><span class="muted">This can’t be undone.</span><span class="x-editbar"><button type="button" class="x-cancel" data-no>Cancel</button><button type="button" class="x-pill danger" data-yes>Delete</button></span>';
+    body.querySelector(':scope > .acts').after(c); c.querySelector('[data-yes]').focus();
+    c.querySelector('[data-no]').addEventListener('click', function () { c.remove(); });
+    c.querySelector('[data-yes]').addEventListener('click', function () {
+      var yes = c.querySelector('[data-yes]'); yes.disabled = true; yes.textContent = 'Deleting…';
+      api('rpc/travel_delete_reply', { method: 'POST', body: { p_id: id, p_token: tokens[id] || null } }).then(function (res) {
+        if (form.closest('#reply-' + id)) resetComposer();
+        if (res.soft) { byId[id].deleted = true; byId[id].body = ''; byId[id].name = ''; } else { delete byId[id]; }
+        delete tokens[id]; store.set(TOKENS_KEY, JSON.stringify(tokens));
+        render();
+      }).catch(function (err) { yes.disabled = false; yes.textContent = 'Delete'; c.querySelector('.muted').textContent = err.message || 'Could not delete.'; });
+    });
+  }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     if (form.querySelector('[name=website]').value) return; // bots
     var body = ta.value.trim(); if (!body) return;
     pill.disabled = true; msg.className = 'c-msg'; msg.textContent = 'Posting…';
-    var row = { thread_slug: slug, name: asName.slice(0, 60), body: body.slice(0, 1000) };
-    if (replyTo) row.post_index = replyTo;
-    api('travel_comments', { method: 'POST', headers: { Prefer: 'return=representation' }, body: row })
-      .then(function (rows) {
-        var empty = list.querySelector('.x-empty'); if (empty) empty.remove();
-        (rows || []).forEach(function (c) {
-          list.insertBefore(replyEl(c, true), list.firstChild);
-          var n = c.post_index || 1; replyCounts[n] = (replyCounts[n] || 0) + 1;
-          likeState[slug + '#r' + c.id] = { count: 0, liked: false };
-        });
-        paintReplyCounts();
+    api('rpc/travel_add_reply', { method: 'POST', body: { p_slug: slug, p_name: asName, p_body: body, p_post_index: parentId ? null : replyTo, p_parent_id: parentId } })
+      .then(function (r) {
+        saveToken(r.id, r.edit_token); delete r.edit_token;
+        byId[r.id] = r; likeState[slug + '#r' + r.id] = { count: 0, liked: false };
+        var target = parentId; resetComposer(); render();
+        var el = document.getElementById('reply-' + r.id); if (el) { el.classList.add('fresh'); if (target) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         ta.value = ''; ta.style.height = ''; form.querySelector('[data-chars]').textContent = '0/1000';
         msg.className = 'c-msg ok'; msg.textContent = 'Your reply was sent.';
         setTimeout(function () { if (msg.textContent === 'Your reply was sent.') msg.textContent = ''; }, 3000);
       })
-      .catch(function (err) { msg.className = 'c-msg err'; msg.textContent = /Too many/.test(err.message) ? err.message : 'Could not post. Please try again.'; pill.disabled = false; });
+      .catch(function (err) { msg.className = 'c-msg err'; msg.textContent = /Too many|can.t reply|no longer/i.test(err.message) ? err.message : 'Could not post. Please try again.'; pill.disabled = false; });
   });
   if (/^#post-\d+$/.test(location.hash)) { var tgt = document.querySelector(location.hash); if (tgt) tgt.classList.add('flash'); }
 })();
