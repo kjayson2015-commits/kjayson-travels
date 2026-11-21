@@ -12,16 +12,16 @@ write('dashboard/index.html', page({
   noindex: true,
   track: false,
   body: `<div class="wrap"><div class="prose" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px"><div><h1 style="margin-bottom:4px">Dashboard</h1><p class="muted" style="margin:0" id="d-updated">Loading…</p></div>
-<div class="seg" role="group" aria-label="Time range"><button type="button" data-days="7" aria-pressed="false">7 days</button><button type="button" data-days="30" aria-pressed="true">30 days</button><button type="button" data-days="90" aria-pressed="false">90 days</button></div></div>
+<div class="seg" role="group" aria-label="Time range"><button type="button" data-days="1" aria-pressed="false">Today</button><button type="button" data-days="7" aria-pressed="false">7 days</button><button type="button" data-days="30" aria-pressed="true">30 days</button><button type="button" data-days="90" aria-pressed="false">90 days</button></div></div>
 <div class="dash-tiles">
 <div class="tile"><b id="d-views">–</b><span>Page views</span></div>
 <div class="tile"><b id="d-visitors">–</b><span>Visitors</span></div>
 <div class="tile"><b id="d-today">–</b><span>Views today</span></div>
-<div class="tile"><b id="d-all">–</b><span>All-time views</span></div>
+<div class="tile"><b id="d-all">–</b><span id="d-all-label">Total views</span></div>
 <div class="tile"><b id="d-likes">–</b><span>Likes</span></div>
 <div class="tile"><b id="d-comments">–</b><span>Replies</span></div>
 </div>
-<section class="panel"><h2>Views per day</h2><div class="bars" id="d-bars" role="img" aria-label="Views per day"></div><div class="bar-axis"><span id="d-first"></span><span id="d-last"></span></div></section>
+<section class="panel"><h2 id="d-bars-title">Views per day</h2><div class="bars" id="d-bars" role="img" aria-label="Views per day"></div><div class="bar-axis"><span id="d-first"></span><span id="d-last"></span></div></section>
 <div class="dash-grid">
 <section class="panel"><h2>Top pages</h2><ul class="rows" id="d-pages"></ul></section>
 <section class="panel"><h2>Where visitors came from</h2><ul class="rows" id="d-refs"></ul></section>
