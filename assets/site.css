@@ -37,6 +37,8 @@ img{max-width:100%;height:auto;display:block}
 .strip .polaroid{flex:1 1 150px;max-width:300px;padding:8px 8px 22px}
 .polaroid{background:var(--paper);padding:12px 12px 36px;box-shadow:0 1px 2px var(--shadow),0 8px 24px var(--shadow);margin:0}
 .polaroid img{width:100%;aspect-ratio:var(--ar,3/2);object-fit:cover;background:var(--photo)}
+/* keep tall phone photos within one screen */
+.thread .polaroid{max-width:min(100%,calc(78vh * var(--ar,3/2) + 24px))}
 .polaroid figcaption{font-size:14px;color:var(--muted);padding-top:10px}
 .empty{text-align:center;padding:72px 0;color:var(--muted)}
 .empty h2{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--ink);font-size:34px;margin:0 0 8px}

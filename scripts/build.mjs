@@ -60,6 +60,7 @@ let threads = fs.existsSync(DIR) ? fs.readdirSync(DIR).filter((f) => f.endsWith(
   t.cover = (t.posts.find((p) => p.image) || {}).image || null;
   t.summaryText = plain(t.summary) || clip(t.posts.map((p) => plain(p.text)).join(' '), 155);
   t.words = t.posts.map((p) => plain(p.text)).join(' ').split(' ').filter(Boolean).length;
+  t.readMin = Math.max(1, Math.round(t.words / 200 + t.posts.filter((p) => p.image).length * 5 / 60)); // ~5s per photo
   return t;
 }).filter(Boolean) : [];
 threads = threads.filter((t) => WITH_DRAFTS || !t.draft).sort((a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title));
@@ -210,7 +211,7 @@ function entryHtml(t, i) {
   const photos = t.posts.filter((p) => p.image).slice(0, 3);
   const showThread = i === 0;
   return `<article class="entry">
-<div class="entry-side">${stamp(t, i % 2 === 1)}<p class="kicker">${t.posts.length} posts · ${Math.max(1, Math.round(t.words / 200))} min read</p></div>
+<div class="entry-side">${stamp(t, i % 2 === 1)}<p class="kicker">${t.posts.length} posts · ${t.readMin} min read</p></div>
 <div class="entry-main">
 <h2><a href="${u(t.url)}">${esc(t.title)}</a></h2>
 ${showThread ? postsHtml(t, { limit: 3, headingLevel: 'h2', eagerFirst: true }) : `<p class="summary">${esc(t.summaryText)}</p>${photos.length ? `<div class="strip">${photos.map((p) => figure(p.image)).join('')}</div>` : ''}`}
@@ -272,7 +273,7 @@ for (const t of threads) {
 <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${u('/')}">Threads</a></li><li><a href="${u(`/places/${t.placeSlug}/`)}">${esc(t.place)}</a></li><li aria-current="page">${esc(t.title)}</li></ol></nav>
 <article>
 <header class="t-head">${stamp(t)}<div class="t-head-main"><p class="kicker">Thread · ${t.posts.length} posts</p><h1>${esc(t.title)}</h1>
-<div class="byline"><img src="${u('/assets/avatar-96.webp')}" alt="" width="28" height="28"><a href="${u('/about/')}" rel="author">${esc(A.name)}</a><time datetime="${t.date}">${fmtDate(t.date)}</time>${t.updated !== t.date ? `<span>Updated <time datetime="${t.updated}">${fmtDate(t.updated)}</time></span>` : ''}<span>${Math.max(1, Math.round(t.words / 200))} min read</span></div></div></header>
+<div class="byline"><img src="${u('/assets/avatar-96.webp')}" alt="" width="28" height="28"><a href="${u('/about/')}" rel="author">${esc(A.name)}</a><time datetime="${t.date}">${fmtDate(t.date)}</time>${t.updated !== t.date ? `<span>Updated <time datetime="${t.updated}">${fmtDate(t.updated)}</time></span>` : ''}<span>${t.readMin} min read</span></div></div></header>
 ${postsHtml(t, { actions: true })}
 ${t.tags.length ? `<ul class="tags" aria-label="Topics">${t.tags.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
 <div class="share"><span>Share this thread</span>
