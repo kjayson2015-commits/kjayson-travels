@@ -41,3 +41,20 @@ Everything about you (name, bio, X, Facebook, website) is in `site.config.json`.
 node scripts/build.mjs --drafts --local
 npx serve _site -l 3000
 ```
+
+## How the code is organised
+
+`scripts/build.mjs` builds the site from `content/threads/*.json`. It is split into small files:
+
+| File | What it does |
+|---|---|
+| `scripts/lib/site.mjs` | Settings, URL helpers, shared structured data |
+| `scripts/lib/util.mjs` | Escaping, dates, text → HTML |
+| `scripts/lib/content.mjs` | Loads threads and checks them (missing alt text, leftover `[PLACEHOLDERS]`) |
+| `scripts/lib/layout.mjs` | `<head>`, header and footer used by every page |
+| `scripts/lib/components.mjs` | Photos, posts, cards |
+| `scripts/lib/feeds.mjs` | Sitemap, RSS, robots.txt, llms.txt |
+| `scripts/pages/*.mjs` | One file per kind of page (home, thread, places, about/contact/privacy, dashboard, editor) |
+
+Content problems are printed after each build and shown as warnings in GitHub Actions.
+
