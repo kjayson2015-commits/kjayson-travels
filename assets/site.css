@@ -37,8 +37,6 @@ img{max-width:100%;height:auto;display:block}
 .strip .polaroid{flex:1 1 150px;max-width:300px;padding:8px 8px 22px}
 .polaroid{background:var(--paper);padding:12px 12px 36px;box-shadow:0 1px 2px var(--shadow),0 8px 24px var(--shadow);margin:0}
 .polaroid img{width:100%;aspect-ratio:var(--ar,3/2);object-fit:cover;background:var(--photo)}
-/* keep tall phone photos within one screen */
-.thread .polaroid{max-width:min(100%,calc(78vh * var(--ar,3/2) + 24px))}
 .polaroid figcaption{font-size:14px;color:var(--muted);padding-top:10px}
 .empty{text-align:center;padding:72px 0;color:var(--muted)}
 .empty h2{font-family:var(--serif);font-style:italic;font-weight:500;color:var(--ink);font-size:34px;margin:0 0 8px}
@@ -65,7 +63,7 @@ img{max-width:100%;height:auto;display:block}
 .post .who a{color:var(--muted);text-decoration:none}
 .post .text{font-size:19px;line-height:1.6;margin:4px 0 0;overflow-wrap:anywhere}
 .post .text p{margin:0 0 10px}
-.post .polaroid{margin-top:12px;max-width:620px}
+.post .polaroid{margin-top:12px;max-width:min(620px,calc(78vh * var(--ar,3/2) + 24px))} /* tall phone photos stay within one screen */
 .share{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:8px 0 0}
 .share span{font-weight:600;margin-right:4px}
 .btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer}
